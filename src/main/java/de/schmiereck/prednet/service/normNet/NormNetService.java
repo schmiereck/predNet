@@ -67,14 +67,20 @@ public class NormNetService {
         calcError(parentNeuron, error);
     }
 
-    public static void calcValue(final NormNet net) {
+    public static void calcValue(final NormNet net, final int[] inputArr) {
+        for (int neuronPos = 0; neuronPos < net.inputNeuronList.size(); neuronPos++) {
+            final NormNeuron neuron = net.inputNeuronList.get(neuronPos);
+            neuron.value = inputArr[neuronPos];
+        }
         for (final NormNeuron neuron : net.inputNeuronList) {
             calcValue(neuron);
         }
     }
+
     private static void calcValue(final NormNeuron neuron) {
         for (final NormSynapse synapse : neuron.childSynapseList) {
             final NormNeuron childNeuron = synapse.childNeuron;
+            // Value anhand aller parent Synapsen des childNeuron:
             childNeuron.value += (neuron.value * synapse.weight) / NormNeuron.MaxValue;
 
             calcValue(childNeuron);
