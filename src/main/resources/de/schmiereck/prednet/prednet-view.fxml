@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.BorderPane?>
+<BorderPane
+        xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        fx:controller="de.schmiereck.prednet.PredNetViewController"
+>
+    <center>
+        <Pane fx:id="chartPane" prefWidth="600" prefHeight="300" style="-fx-background-color: #1e1e1e;" />
+    </center>
+    <top>
+        <Label text="PredNet Kurven" style="-fx-font-size:16; -fx-padding:8;" />
+    </top>
+</BorderPane>
+

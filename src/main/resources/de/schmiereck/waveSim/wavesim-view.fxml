@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import de.schmiereck.waveSim.WaveVisualizer?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Label?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="de.schmiereck.waveSim.WaveSimViewController">
+    <center>
+        <WaveVisualizer fx:id="waveVisualizer" width="500" height="400"/>
+    </center>
+    <right>
+        <VBox spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets left="10" right="10"/>
+            </padding>
+            <Button fx:id="startButton" text="Start" onAction="#handleStartButton"/>
+            <Button fx:id="stopButton" text="Stop" onAction="#handleStopButton"/>
+            <Button fx:id="resetButton" text="Reset" onAction="#handleResetButton"/>
+            <Label text="Damping"/>
+            <Slider fx:id="dampingSlider" min="0" max="1" value="0.1"/>
+        </VBox>
+    </right>
+</BorderPane>
+

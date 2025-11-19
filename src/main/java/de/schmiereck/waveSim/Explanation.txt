@@ -1,0 +1,30 @@
+Main
+
+	Fetch the scene image based on the name supplied
+	create a simulator as an instance of the WaveSimulator2D class with the dimensions of the scene image	
+	Create a visualizer based on the WaveVisualizer based on two color maps and inversion and black level stings
+	Load the scene data from the image using load_scene_from_image
+		- set the wave simulation refractive index values based on the red data byte [0] from each image point
+		- set a field average: in principle we want to retrieve this from the wave
+		- set the wave simulation field value starting condition from the green data  byte [1] from each image point
+		- set the wave simulation damping values based on the blue values 
+
+	Create 2 video writers that can write images using the image scene dimensions. These can be used to write the movies, third parameter is frames per second
+	run the simulation for a number of time steps using the num_iterations value
+		A. simulator.up.update_field 
+			Calculate the Laplacian of the current field
+			1: create a new field matrix for the damping using the current field value (u) previous field value (u_prev) and the damping field value (d)
+			2: create new field (r) using the current field (u), the Laplacian and the damping field (d) and the speed field
+			3: make the previous field (u_prev) the current field (u)
+			4: make the current field u
+			5: increase the time value	
+		B. simulator.compute_strain_and_new_IOR parameters are the refractive_persistence, scaling factor, non_lin_constant_value and the exponent
+			1: create du_dx and du_dy derivative kernals and a wave speed field
+			2: calculate the strain_field from the du_dx and du_dy values
+			3: calculate the current index of refraction field using a previous value and the strain value
+			4 set the speed field from the index of refraction field
+		C. update the visualizer using the data contained in the simulator instance
+			show any data on screen as show field
+
+what goes wrong: the current range for the refractive index is very low 1-2,5. This means that speed differences can only of this order. what we could do use a different definition for the lowest refractive index, for example an integer value of 10 or 50 (this version uses 50). This would allow us to define higher initial refractive indices 			 
+	
