@@ -43,32 +43,30 @@ public class NormNetService {
     }
 
     public static void calcError(final NormNet net, final long[] targetOutputArr) {
-        for (final NormNeuron neuron : net.neuronList) {
-            neuron.error = 0;
-        }
-
         for (int neuronPos = 0; neuronPos < net.outputNeuronList.size(); neuronPos++) {
             final NormNeuron neuron = net.outputNeuronList.get(neuronPos);
             final long targetOutput = targetOutputArr[neuronPos];
             neuron.error = targetOutput - neuron.value;
         }
-        for (final NormNeuron neuron : net.outputNeuronList) {
-            calcError(neuron, neuron.error);
+        for (int neuronPos = net.neuronList.size() - 1; neuronPos >= 0; neuronPos--) {
+            final NormNeuron neuron = net.neuronList.get(neuronPos);
+            if (neuron.neuronType != NormNeuron.NeuronType.Output) {
+                calcError(neuron);
+            }
         }
     }
 
-    private static void calcError(final NormNeuron neuron, final long error) {
-        for (final NormSynapse synapse : neuron.parentSynapseList) {
-            calcError(neuron, synapse, error);
+    private static void calcError(final NormNeuron neuron) {
+        neuron.error = NormNeuron.NullValue;
+        for (final NormSynapse synapse : neuron.childSynapseList) {
+            calcError(neuron, synapse);
         }
     }
 
-    private static void calcError(final NormNeuron neuron, final NormSynapse synapse, final long error) {
-        final NormNeuron parentNeuron = synapse.parentNeuron;
-        final long propagatedError = (error * synapse.weight) / NormNeuron.MaxValue;
-        parentNeuron.error += propagatedError;
-
-        calcError(parentNeuron, error);
+    private static void calcError(final NormNeuron neuron, final NormSynapse synapse) {
+        final NormNeuron childNeuron = synapse.childNeuron;
+        final long propagatedError = (childNeuron.error * synapse.weight) / NormNeuron.MaxValue;
+        neuron.error += propagatedError;
     }
 
     public static void calcValue(final NormNet net, final long[] inputArr) {
@@ -100,4 +98,25 @@ public class NormNetService {
     public static long calcActivation(final long value) {
         return Math.max(NormNeuron.MinValue, Math.min(NormNeuron.MaxValue, value));
     }
+
+    public static void train(final NormNet net, final long learningRate) {
+        // Aktualisiere alle Gewichte basierend auf den berechneten Fehlern
+        for (final NormNeuron neuron : net.neuronList) {
+            if (neuron.neuronType != NormNeuron.NeuronType.Input) {
+                updateWeights(neuron, learningRate);
+            }
+        }
+    }
+
+    private static void updateWeights(final NormNeuron neuron, final long learningRate) {
+        for (final NormSynapse synapse : neuron.parentSynapseList) {
+            // Berechne Gewichtsanpassung: deltaWeight = learningRate * error * parentValue
+            final long parentValue = synapse.parentNeuron.value;
+            final long deltaWeight = (learningRate * neuron.error * parentValue) / (NormNeuron.MaxValue * NormNeuron.MaxValue);
+
+            // Aktualisiere Gewicht
+            synapse.weight = Math.max(NormNeuron.MinValue, Math.min(NormNeuron.MaxValue, synapse.weight + deltaWeight));
+        }
+    }
+
 }

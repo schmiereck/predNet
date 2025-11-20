@@ -12,7 +12,11 @@ public class NormNetService_WHEN_calcError_is_called_Test {
 
         for (final NormNeuron neuron : net.neuronList) {
             for (final NormSynapse synapse : neuron.parentSynapseList) {
-                synapse.weight = 100_000; // 0.1 in NormNeuron representation
+                if (synapse.parentNeuron.neuronType == NormNeuron.NeuronType.Bias) {
+                    synapse.weight = 0; // Bias.
+                } else {
+                    synapse.weight = 100_000; // 0.1 in NormNeuron representation
+                }
             }
         }
 
@@ -57,12 +61,9 @@ public class NormNetService_WHEN_calcError_is_called_Test {
         // Assert Input-Errors:
 
         final long l0n0e =
-                ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue) +
-                ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue);
+                ((l1n0e * 100_000) / NormNeuron.MaxValue) + ((l1n1e * 100_000) / NormNeuron.MaxValue);
         final long l0n1e =
-                ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue) +
-                ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue);
-
+                ((l1n0e * 100_000) / NormNeuron.MaxValue) + ((l1n1e * 100_000) / NormNeuron.MaxValue);
 
         //final int[] expectedInputErrorArr = new int[]{ 300, 300 };
         final long[] expectedInputErrorArr = new long[] { l0n0e, l0n1e };
