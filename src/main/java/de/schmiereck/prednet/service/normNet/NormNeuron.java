@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NormNeuron {
-    public static final long MaxValue = 1_000_000;
-    public static final long NullValue = 0;
+    public static final long MaxValue = 1_000_000L;
+    public static final long NullValue = 0L;
     public static final long MinValue = -MaxValue;
 
     public enum NeuronType { Input, Hidden, Output, Bias }

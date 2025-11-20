@@ -2,6 +2,8 @@ package de.schmiereck.prednet.service.normNet;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Random;
+
 import static de.schmiereck.prednet.service.normNet.NormNetUtils.calcValuePerc;
 
 public class NormNetService_WHEN_calcTrain_is_called_Test {
@@ -58,15 +60,18 @@ public class NormNetService_WHEN_calcTrain_is_called_Test {
                         { calcValuePerc(100), calcValuePerc(100) }
                 };
 
+        final Random rnd = new Random(28);
+
         for (int iterationPos = 0; iterationPos < 500; iterationPos++) {
-            for (int dataPos = 0; dataPos < inputArrArr.length; dataPos++) {
+            for (int xdataPos = 0; xdataPos < inputArrArr.length; xdataPos++) {
+                final int dataPos = rnd.nextInt(inputArrArr.length);
                 final long[] inputArr = inputArrArr[dataPos];
                 final long[] targetOutputArr = targetOutputArrArr[dataPos];
 
                 NormNetService.calcValue(net, inputArr);
                 final long mse = NormNetService.calcError(net, targetOutputArr);
-                System.out.printf("iter: %d: mse: %d%n", iterationPos, mse);
-                NormNetService.calcTrain(net, calcValuePerc(10));
+                System.out.printf("iter: %4d: mse: %13d%n", iterationPos, mse);
+                NormNetService.calcTrain(net, calcValuePerc(25));
             }
             if (iterationPos % 1000 == 0) {
                 showResult(net, inputArrArr, targetOutputArrArr);
@@ -96,7 +101,7 @@ public class NormNetService_WHEN_calcTrain_is_called_Test {
                         { calcValuePerc(60), calcValuePerc(60) }
                 };
 
-        for (int iterationPos = 0; iterationPos < 140000; iterationPos++) {
+        for (int iterationPos = 0; iterationPos < 150; iterationPos++) {
             for (int dataPos = 0; dataPos < inputArrArr.length; dataPos++) {
                 final long[] inputArr = inputArrArr[dataPos];
                 final long[] targetOutputArr = targetOutputArrArr[dataPos];
@@ -104,7 +109,7 @@ public class NormNetService_WHEN_calcTrain_is_called_Test {
                 NormNetService.calcValue(net, inputArr);
                 final long mse = NormNetService.calcError(net, targetOutputArr);
                 System.out.printf("iter: %d: mse: %d%n", iterationPos, mse);
-                NormNetService.calcTrain(net, calcValuePerc(10));
+                NormNetService.calcTrain(net, calcValuePerc(30));
             }
             if (iterationPos % 1000 == 0) {
                 showResult(net, inputArrArr, targetOutputArrArr);
@@ -120,7 +125,7 @@ public class NormNetService_WHEN_calcTrain_is_called_Test {
             final long[] targetOutputArr = targetOutputArrArr[dataPos];
 
             NormNetService.calcValue(net, inputArr);
-            System.out.printf("in: [%6d, %6d] -> out: [%6d, %6d] (soll: [%6d, %6d])%n",
+            System.out.printf("in: [%7d, %7d] -> out: [%7d, %7d] (soll: [%7d, %7d])%n",
                     inputArr[0], inputArr[1],
                     net.outputNeuronList.get(0).value, net.outputNeuronList.get(1).value,
                     targetOutputArr[0], targetOutputArr[1]);

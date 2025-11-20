@@ -1,6 +1,10 @@
 package de.schmiereck.prednet.service.normNet;
 
+import java.util.Random;
+
 public class NormNetService {
+    private static final Random random = new Random(42); // Fixer Seed für Reproduzierbarkeit
+
     public static NormNet initNet(final int[] layerNeuronCounts) {
         final NormNet net = new NormNet();
 
@@ -18,13 +22,14 @@ public class NormNetService {
 
                 // Create synapses from parent layer to this neuron.
                 if (layerPos > 0) {
+                    final int inputCount = parentLayerNeuronArr.length + 1; // +1 for bias
                     for (final NormNeuron parentLayerNeuron : parentLayerNeuronArr) {
-                        final NormSynapse synapse = new NormSynapse(parentLayerNeuron, NormNeuron.NullValue, neuron);
+                        final NormSynapse synapse = new NormSynapse(parentLayerNeuron, calcInitWeight(inputCount), neuron);
                         neuron.parentSynapseList.add(synapse);
                         parentLayerNeuron.childSynapseList.add(synapse);
                     }
                     // Add bias synapse.
-                    final NormSynapse synapse = new NormSynapse(net.biasNeuron, NormNeuron.NullValue, neuron);
+                    final NormSynapse synapse = new NormSynapse(net.biasNeuron, calcInitWeight(inputCount), neuron);
                     neuron.parentSynapseList.add(synapse);
                 }
                 layerNeuronArr[neuronPos] = neuron;
@@ -40,6 +45,29 @@ public class NormNetService {
         }
 
         return net;
+    }
+
+    /**
+     * Xavier/Glorot Initialisierung für normalized values.
+     * Gewichte im Bereich [-MaxValue/sqrt(n), +MaxValue/sqrt(n)]
+     * wobei n = Anzahl Input-Neuronen
+     */
+    private static long calcInitWeight() {
+        // Zufallswert zwischen -0.1 und +0.1 (10% von MaxValue)
+        final double randomValue = (random.nextDouble() * 2.0 - 1.0) * 0.1;
+        return (long) (randomValue * NormNeuron.MaxValue);
+    }
+
+    /**
+     * Alternative: He-Initialisierung (besser für ReLU-artige Funktionen)
+     */
+    private static long calcInitWeight(final int inputCount) {
+        // He-Initialisierung: sqrt(2/n)
+        final double scale = Math.sqrt(2.0 / inputCount);
+        final double randomValue = random.nextGaussian() * scale;
+        return (long) Math.max(NormNeuron.MinValue,
+                Math.min(NormNeuron.MaxValue,
+                        randomValue * NormNeuron.MaxValue));
     }
 
     public static long calcError(final NormNet net, final long[] targetOutputArr) {
@@ -72,8 +100,20 @@ public class NormNetService {
         for (final NormSynapse synapse : neuron.childSynapseList) {
             calcError(neuron, synapse);
         }
+        // Multipliziere mit Ableitung der Aktivierungsfunktion
+        neuron.error = (neuron.error * calcActivationDerivative(neuron.value)) / NormNeuron.MaxValue;
     }
 
+    /**
+     * Ableitung der Hard Tanh Aktivierungsfunktion.
+     * Gibt 1 (= MaxValue) zurück wenn nicht gesättigt, sonst 0.
+     */
+    private static long calcActivationDerivative(final long value) {
+        if (value <= NormNeuron.MinValue || value >= NormNeuron.MaxValue) {
+            return NormNeuron.NullValue; // Gesättigt → Gradient = 0
+        }
+        return NormNeuron.MaxValue; // Linear → Gradient = 1
+    }
     private static void calcError(final NormNeuron neuron, final NormSynapse synapse) {
         final NormNeuron childNeuron = synapse.childNeuron;
         final long propagatedError = (childNeuron.error * synapse.weight) / NormNeuron.MaxValue;
@@ -123,7 +163,10 @@ public class NormNetService {
         for (final NormSynapse synapse : neuron.parentSynapseList) {
             // Berechne Gewichtsanpassung: deltaWeight = learningRate * error * parentValue
             final long parentValue = synapse.parentNeuron.value;
-            final long deltaWeight = (learningRate * neuron.error * parentValue) / (NormNeuron.MaxValue * NormNeuron.MaxValue);
+            //final long deltaWeight = (learningRate * neuron.error * parentValue) / (NormNeuron.MaxValue * NormNeuron.MaxValue);
+            // Erst error × parentValue, dann × learningRate
+            final long errorTimesValue = (neuron.error * parentValue) / NormNeuron.MaxValue;
+            final long deltaWeight = (learningRate * errorTimesValue) / NormNeuron.MaxValue;
 
             // Aktualisiere Gewicht
             synapse.weight = Math.max(NormNeuron.MinValue, Math.min(NormNeuron.MaxValue, synapse.weight + deltaWeight));
