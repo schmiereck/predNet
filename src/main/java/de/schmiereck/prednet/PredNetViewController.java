@@ -28,11 +28,11 @@ public class PredNetViewController {
     private void setupChart() {
         inputLine = new Polyline();
         inputLine.setStroke(Color.LIMEGREEN);
-        inputLine.setStrokeWidth(2.0);
+        inputLine.setStrokeWidth(8.0);
 
         outputLine = new Polyline();
-        outputLine.setStroke(Color.ORANGERED);
-        outputLine.setStrokeWidth(2.0);
+        outputLine.setStroke(Color.BLUEVIOLET);
+        outputLine.setStrokeWidth(4.0);
 
         chartPane.getChildren().addAll(inputLine, outputLine);
     }
@@ -58,16 +58,19 @@ public class PredNetViewController {
         if (h <= 0) h = 300;
 
         int len = inputArr.length;
-        double dx = w / (len - 1);
+        //double dx = w / (len - 1);
+        double dx = w / (len);
         double maxVal = 100.0; // bekannte Maximalwerte (Annahme)
+        double minVal = -100.0; // bekannte Minimalwerte (Annahme)
+        double range = maxVal - minVal;
 
-        for (int i = 0; i < len; i++) {
-            double x = i * dx;
-            double yInput = h - (inputArr[i] / maxVal) * (h - 20) - 10; // Padding 10
-            double yOutput = h - (outputHistArr[i] / maxVal) * (h - 20) - 10;
-            inputLine.getPoints().addAll(x, yInput);
-            outputLine.getPoints().addAll(x, yOutput);
+        for (int curvePos = 0; curvePos < len; curvePos++) {
+            double xInput = curvePos * dx;
+            double xOutput = (curvePos + 1) * dx; // Output ist eine Vorhersage in die zukunft.
+            double yInput = h - ((inputArr[curvePos] - minVal) / range) * (h - 20) - 10; // Padding 10
+            double yOutput = h - ((outputHistArr[curvePos] - minVal) / range) * (h - 20) - 10;
+            inputLine.getPoints().addAll(xInput, yInput);
+            outputLine.getPoints().addAll(xOutput, yOutput);
         }
     }
 }
-

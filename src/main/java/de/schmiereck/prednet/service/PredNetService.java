@@ -13,6 +13,8 @@ public class PredNetService {
             {
                     0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
                     90, 80, 70, 60, 50, 40, 30, 20, 10,
+                    0, -10, -20, -30, -40, -50, -60, -70, -80, -90, -100,
+                    -90, -80, -70, -60, -50, -40, -30, -20, -10
             };
     private volatile int xPosCurve; // volatile für Sichtbarkeit zwischen Threads
     private final int curveLength;
@@ -20,20 +22,22 @@ public class PredNetService {
     private volatile long output; // volatile Referenz, wird in calc() neu erzeugt
     private volatile long[] outputHistorieCurveArr; // volatile Referenz, wird in calc() neu erzeugt
 
+    private int netCurveLength;
     private final NormNet net;
 
     public PredNetService() {
         this.xPosCurve = 0;
-        this.curveLength = 10;
+        this.curveLength = 45;
         this.inputCurveArr = new long[this.curveLength];
         this.output = 0;
         this.outputHistorieCurveArr = new long[this.curveLength];
 
+        this.netCurveLength = 7;//this.curveLength / 4;
         final int[] layerNeuronCounts = new int[] {
-                this.curveLength,
-                this.curveLength * 2,
-                this.curveLength * 2,
-                this.curveLength,
+                this.netCurveLength,
+                this.netCurveLength * 2,
+                this.netCurveLength * 2,
+                this.netCurveLength,
                 1
         };
         this.net = NormNetService.initNet(layerNeuronCounts);
@@ -72,8 +76,8 @@ public class PredNetService {
         final long expectedOutput = this.precalcCurveArr[(this.xPosCurve + this.curveLength - 1) % this.precalcCurveArr.length];
         expectedOutputArr[0] = expectedOutput * NormNeuron.MaxValue / 100L;
 
-        final long[] inputArr = new long[this.inputCurveArr.length];
-        for (int posX = 0; posX < this.inputCurveArr.length; posX++) {
+        final long[] inputArr = new long[this.netCurveLength];
+        for (int posX = 0; posX < this.netCurveLength; posX++) {
             inputArr[posX] = this.inputCurveArr[posX] * NormNeuron.MaxValue / 100L;
         }
         NormNetService.calcValue(net, inputArr);
