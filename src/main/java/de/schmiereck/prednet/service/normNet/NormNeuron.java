@@ -4,16 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NormNeuron {
-    public static final int MaxValue = 1_000_000;
-    public static final int NullValue = 0;
-    public static final int MinValue = -MaxValue;
+    public static final long MaxValue = 1_000_000;
+    public static final long NullValue = 0;
+    public static final long MinValue = -MaxValue;
 
-    public int value;
-    public int error;
+    public enum NeuronType { Input, Hidden, Output, Bias }
+
+    public final NeuronType neuronType;
+    public long value;
+    public long error;
     public final List<NormSynapse> parentSynapseList = new ArrayList<>();
     public final List<NormSynapse> childSynapseList = new ArrayList<>();
 
-    public NormNeuron(final int value) {
+    public NormNeuron(final NeuronType neuronType, final long value) {
+        this.neuronType = neuronType;
         this.value = value;
     }
 }

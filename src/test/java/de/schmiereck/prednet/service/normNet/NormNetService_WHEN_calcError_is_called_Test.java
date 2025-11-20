@@ -16,20 +16,20 @@ public class NormNetService_WHEN_calcError_is_called_Test {
             }
         }
 
-        final int l2n0i = 500;
-        final int l2n1i = 1_000;
-        final int[] targetOutputArr = new int[]{ l2n0i, l2n1i };
+        final long l2n0i = 500;
+        final long l2n1i = 1_000;
+        final long[] targetOutputArr = new long[]{ l2n0i, l2n1i };
 
         NormNetService.calcError(net, targetOutputArr);
 
         // Assert Outputs:
-        final int l2n0e = l2n0i - 0;
-        final int l2n1e = l2n1i - 0;
-        final int[] expectedOutputErrorArr = new int[]{ 500, 1_000 };
+        final long l2n0e = l2n0i - 0;
+        final long l2n1e = l2n1i - 0;
+        final long[] expectedOutputErrorArr = new long[]{ 500, 1_000 };
 
         for (int neuronPos = 0; neuronPos < net.outputNeuronList.size(); neuronPos++) {
             final NormNeuron neuron = net.outputNeuronList.get(neuronPos);
-            final int expectedError = expectedOutputErrorArr[neuronPos];
+            final long expectedError = expectedOutputErrorArr[neuronPos];
             Assertions.assertEquals(expectedError, neuron.error, "Output-Neuron Pos: " + neuronPos);
         }
 
@@ -40,8 +40,8 @@ public class NormNetService_WHEN_calcError_is_called_Test {
 
         //final int l1n0e = ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue);
         //final int l1n1e = ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue);
-        final int l1n0e = ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue);
-        final int l1n1e = ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue);
+        final long l1n0e = ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue);
+        final long l1n1e = ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue);
 
         {
             final int neuronPos = 2;
@@ -56,20 +56,20 @@ public class NormNetService_WHEN_calcError_is_called_Test {
 
         // Assert Input-Errors:
 
-        final int l0n0e =
+        final long l0n0e =
                 ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue) +
                 ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue);
-        final int l0n1e =
+        final long l0n1e =
                 ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue) +
                 ((l2n0e * 100_000) / NormNeuron.MaxValue) + ((l2n1e * 100_000) / NormNeuron.MaxValue);
 
 
         //final int[] expectedInputErrorArr = new int[]{ 300, 300 };
-        final int[] expectedInputErrorArr = new int[] { l0n0e, l0n1e };
+        final long[] expectedInputErrorArr = new long[] { l0n0e, l0n1e };
 
         for (int neuronPos = 0; neuronPos < net.inputNeuronList.size(); neuronPos++) {
             final NormNeuron neuron = net.inputNeuronList.get(neuronPos);
-            final int expectedError = expectedInputErrorArr[neuronPos];
+            final long expectedError = expectedInputErrorArr[neuronPos];
             Assertions.assertEquals(expectedError, neuron.error, "Input-Neuron Pos: " + neuronPos);
         }
     }
