@@ -42,18 +42,29 @@ public class NormNetService {
         return net;
     }
 
-    public static void calcError(final NormNet net, final long[] targetOutputArr) {
+    public static long calcError(final NormNet net, final long[] targetOutputArr) {
+        long totalError = NormNeuron.NullValue;
+
         for (int neuronPos = 0; neuronPos < net.outputNeuronList.size(); neuronPos++) {
             final NormNeuron neuron = net.outputNeuronList.get(neuronPos);
             final long targetOutput = targetOutputArr[neuronPos];
             neuron.error = targetOutput - neuron.value;
+
+            // Akkumuliere quadratischen Fehler
+            final long squaredError = (neuron.error * neuron.error);
+            totalError += squaredError;
         }
+
         for (int neuronPos = net.neuronList.size() - 1; neuronPos >= 0; neuronPos--) {
             final NormNeuron neuron = net.neuronList.get(neuronPos);
             if (neuron.neuronType != NormNeuron.NeuronType.Output) {
                 calcError(neuron);
             }
         }
+
+        // Berechne Mean Squared Error
+        final long mse = totalError / (net.outputNeuronList.size() * NormNeuron.MaxValue);
+        return mse;
     }
 
     private static void calcError(final NormNeuron neuron) {
@@ -99,7 +110,7 @@ public class NormNetService {
         return Math.max(NormNeuron.MinValue, Math.min(NormNeuron.MaxValue, value));
     }
 
-    public static void train(final NormNet net, final long learningRate) {
+    public static void calcTrain(final NormNet net, final long learningRate) {
         // Aktualisiere alle Gewichte basierend auf den berechneten Fehlern
         for (final NormNeuron neuron : net.neuronList) {
             if (neuron.neuronType != NormNeuron.NeuronType.Input) {
