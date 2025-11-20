@@ -46,8 +46,8 @@ public class PredNetViewController {
     private void updateCurves() {
         predNetService.calc(); // Berechnung anstoßen (alternativ getrennt, hier einfach integriert)
         CurveDto dto = predNetService.retrieveCurve();
-        int[] inputArr = dto.getInputArr();
-        int[] outputHistArr = dto.getOutputHistorieArr();
+        long[] inputArr = dto.getInputArr();
+        long[] outputHistArr = dto.getOutputHistorieArr();
 
         inputLine.getPoints().clear();
         outputLine.getPoints().clear();

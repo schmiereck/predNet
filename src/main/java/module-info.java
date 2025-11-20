@@ -4,6 +4,7 @@ module de.schmiereck.prednet {
 
     requires org.controlsfx.controls;
     requires com.almasb.fxgl.all;
+    //requires de.schmiereck.prednet;
 
     opens de.schmiereck.prednet to javafx.fxml;
     exports de.schmiereck.prednet;

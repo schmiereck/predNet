@@ -21,7 +21,7 @@ public class PredNetMain {
             t.setDaemon(true); // Daemon, damit JVM bei Ende des Hauptthreads beenden kann
             return t;
         });
-        calcScheduler.scheduleAtFixedRate(() -> predNetService.calc(), 0, 100, TimeUnit.MILLISECONDS);
+        calcScheduler.scheduleAtFixedRate(() -> predNetService.calc(), 0, 10, TimeUnit.MILLISECONDS);
 
         // Zweiter Thread: zeigt alle 40 ms die Kurve an
         final ScheduledExecutorService showScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -41,12 +41,12 @@ public class PredNetMain {
 
     private static void showCurve(PredNetService predNetService) {
         final CurveDto curveDto = predNetService.retrieveCurve();
-        final int[] inputArr = curveDto.getInputArr();
+        final long[] inputArr = curveDto.getInputArr();
         for (int xPos = 0; xPos < inputArr.length; xPos++) {
             System.out.printf("%3d ", inputArr[xPos]);
         }
         System.out.print(" |  ");
-        final int[] outputArr = curveDto.getOutputHistorieArr();
+        final long[] outputArr = curveDto.getOutputHistorieArr();
         for (int xPos = 0; xPos < outputArr.length; xPos++) {
             System.out.printf("%3d ", outputArr[xPos]);
         }
