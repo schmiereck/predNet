@@ -2,24 +2,128 @@ package de.schmiereck.prednet.service.normNet;
 
 import org.junit.jupiter.api.Test;
 
+import static de.schmiereck.prednet.service.normNet.NormNetUtils.calcValuePerc;
+
 public class NormNetService_WHEN_calcTrain_is_called_Test {
 
     @Test
     void GIVEN_3_layer_THEN_net_trained_for_one_input() {
-        final int[] layerNeuronCounts = new int[]{2, 2, 2};
+        final int[] layerNeuronCounts = new int[]{ 2, 2, 2 };
         final NormNet net = NormNetService.initNet(layerNeuronCounts);
 
-        final long[] inputArr = new long[]{ 500, 1_000 };
+        final long[] inputArr = new long[]{ calcValuePerc(10), calcValuePerc(80) };
 
-        final long l2n0i = 5_000;
-        final long l2n1i = 100;
-        final long[] targetOutputArr = new long[]{ l2n0i, l2n1i };
+        final long[] targetOutputArr = new long[]{ calcValuePerc(80), calcValuePerc(10) };
 
-        for (int iterationPos = 0; iterationPos < 14; iterationPos++) {
+        for (int iterationPos = 0; iterationPos < 25; iterationPos++) {
             NormNetService.calcValue(net, inputArr);
             final long mse = NormNetService.calcError(net, targetOutputArr);
-            System.out.printf("mse: %d%n", mse);
-            NormNetService.calcTrain(net, 100_000);
+            System.out.printf("iter: %d: mse: %d%n", iterationPos, mse);
+            NormNetService.calcTrain(net, calcValuePerc(50));
+
+            if (iterationPos % 100 == 0) {
+                showResult(net, inputArr, targetOutputArr);
+            }
+        }
+        showResult(net, inputArr, targetOutputArr);
+    }
+
+    private void showResult(NormNet net, long[] inputArr, long[] targetOutputArr) {
+        System.out.println("---- Ergebnis ----");
+        NormNetService.calcValue(net, inputArr);
+        System.out.printf("in: [%6d, %6d] -> out: [%6d, %6d] (soll: [%6d, %6d])%n",
+                inputArr[0], inputArr[1],
+                net.outputNeuronList.get(0).value, net.outputNeuronList.get(1).value,
+                targetOutputArr[0], targetOutputArr[1]);
+    }
+
+    @Test
+    void GIVEN_x_layer_and_4_inputs_THEN_AND_net_trained() {
+        final int[] layerNeuronCounts = new int[]{ 2, 4, 4, 2 };
+        final NormNet net = NormNetService.initNet(layerNeuronCounts);
+
+        final long[][] inputArrArr = new long[][]
+                {
+                        { calcValuePerc(0), calcValuePerc(0) },
+                        { calcValuePerc(0), calcValuePerc(100) },
+                        { calcValuePerc(100), calcValuePerc(0) },
+                        { calcValuePerc(100), calcValuePerc(100) }
+                };
+
+        final long[][] targetOutputArrArr = new long[][]
+                {
+                        { calcValuePerc(0), calcValuePerc(0) },
+                        { calcValuePerc(0), calcValuePerc(0) },
+                        { calcValuePerc(0), calcValuePerc(0) },
+                        { calcValuePerc(100), calcValuePerc(100) }
+                };
+
+        for (int iterationPos = 0; iterationPos < 500; iterationPos++) {
+            for (int dataPos = 0; dataPos < inputArrArr.length; dataPos++) {
+                final long[] inputArr = inputArrArr[dataPos];
+                final long[] targetOutputArr = targetOutputArrArr[dataPos];
+
+                NormNetService.calcValue(net, inputArr);
+                final long mse = NormNetService.calcError(net, targetOutputArr);
+                System.out.printf("iter: %d: mse: %d%n", iterationPos, mse);
+                NormNetService.calcTrain(net, calcValuePerc(10));
+            }
+            if (iterationPos % 1000 == 0) {
+                showResult(net, inputArrArr, targetOutputArrArr);
+            }
+        }
+        showResult(net, inputArrArr, targetOutputArrArr);
+    }
+
+    @Test
+    void GIVEN_x_layer_and_4_inputs_THEN_net_trained() {
+        final int[] layerNeuronCounts = new int[]{ 2, 4, 8, 4, 2 };
+        final NormNet net = NormNetService.initNet(layerNeuronCounts);
+
+        final long[][] inputArrArr = new long[][]
+                {
+                        { calcValuePerc(0), calcValuePerc(0) },
+                        { calcValuePerc(0), calcValuePerc(60) },
+                        { calcValuePerc(60), calcValuePerc(0) },
+                        { calcValuePerc(60), calcValuePerc(60) }
+                };
+
+        final long[][] targetOutputArrArr = new long[][]
+                {
+                        { calcValuePerc(60), calcValuePerc(0) },
+                        { calcValuePerc(0), calcValuePerc(30) },
+                        { calcValuePerc(0), calcValuePerc(30) },
+                        { calcValuePerc(60), calcValuePerc(60) }
+                };
+
+        for (int iterationPos = 0; iterationPos < 140000; iterationPos++) {
+            for (int dataPos = 0; dataPos < inputArrArr.length; dataPos++) {
+                final long[] inputArr = inputArrArr[dataPos];
+                final long[] targetOutputArr = targetOutputArrArr[dataPos];
+
+                NormNetService.calcValue(net, inputArr);
+                final long mse = NormNetService.calcError(net, targetOutputArr);
+                System.out.printf("iter: %d: mse: %d%n", iterationPos, mse);
+                NormNetService.calcTrain(net, calcValuePerc(10));
+            }
+            if (iterationPos % 1000 == 0) {
+                showResult(net, inputArrArr, targetOutputArrArr);
+            }
+        }
+        showResult(net, inputArrArr, targetOutputArrArr);
+    }
+
+    private void showResult(NormNet net, long[][] inputArrArr, long[][] targetOutputArrArr) {
+        System.out.println("---- Ergebnis ----");
+        for (int dataPos = 0; dataPos < inputArrArr.length; dataPos++) {
+            final long[] inputArr = inputArrArr[dataPos];
+            final long[] targetOutputArr = targetOutputArrArr[dataPos];
+
+            NormNetService.calcValue(net, inputArr);
+            System.out.printf("in: [%6d, %6d] -> out: [%6d, %6d] (soll: [%6d, %6d])%n",
+                    inputArr[0], inputArr[1],
+                    net.outputNeuronList.get(0).value, net.outputNeuronList.get(1).value,
+                    targetOutputArr[0], targetOutputArr[1]);
         }
     }
 }
