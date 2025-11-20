@@ -84,11 +84,20 @@ public class NormNetService {
     }
 
     private static void calcValue(final NormNeuron neuron) {
-        neuron.value = NormNeuron.NullValue;
+        long sumValue = NormNeuron.NullValue;
         for (final NormSynapse synapse : neuron.parentSynapseList) {
             final NormNeuron parentNeuron = synapse.parentNeuron;
             // Value anhand aller parent Synapsen des Neuron:
-            neuron.value += (parentNeuron.value * synapse.weight) / NormNeuron.MaxValue;
+            sumValue += (parentNeuron.value * synapse.weight) / NormNeuron.MaxValue;
         }
+        neuron.value = calcActivation(sumValue);
+    }
+
+    /**
+     * Lineare Aktivierungsfunktion (mit Clipping).
+     * Hard Tanh (Hard Hyperbolic Tangent).
+     */
+    public static long calcActivation(final long value) {
+        return Math.max(NormNeuron.MinValue, Math.min(NormNeuron.MaxValue, value));
     }
 }
