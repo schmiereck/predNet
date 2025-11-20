@@ -13,7 +13,8 @@ public class PredNetFxApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.predNetService = new PredNetService();
+        final int curveType = 0;
+        this.predNetService = new PredNetService(curveType);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("prednet-view.fxml"));
         //FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(this.chartResource.getURL()));

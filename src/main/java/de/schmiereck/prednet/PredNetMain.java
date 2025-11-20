@@ -11,7 +11,8 @@ public class PredNetMain {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("PredNet V1.0.0");
 
-        final PredNetService predNetService = new PredNetService();
+        final int curveType = 0;
+        final PredNetService predNetService = new PredNetService(curveType);
 
         predNetService.calc(); // einmal initial berechnen
 

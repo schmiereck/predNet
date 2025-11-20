@@ -9,13 +9,7 @@ import java.util.Arrays;
 import static de.schmiereck.prednet.service.normNet.NormNetUtils.calcValuePerc;
 
 public class PredNetService {
-    private final int[] precalcCurveArr = new int[]
-            {
-                    0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-                    90, 80, 70, 60, 50, 40, 30, 20, 10,
-                    0, -10, -20, -30, -40, -50, -60, -70, -80, -90, -100,
-                    -90, -80, -70, -60, -50, -40, -30, -20, -10
-            };
+    private final int[] precalcCurveArr;
     private volatile int xPosCurve; // volatile für Sichtbarkeit zwischen Threads
     private final int curveLength;
     private volatile long[] inputCurveArr; // volatile Referenz, wird in calc() neu erzeugt
@@ -25,7 +19,21 @@ public class PredNetService {
     private int netCurveLength;
     private final NormNet net;
 
-    public PredNetService() {
+    public PredNetService(final int curveType) {
+        this.precalcCurveArr =
+            switch (curveType) {
+                case 0 ->
+                    new int[]
+                            {
+                                    0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+                                    90, 80, 70, 60, 50, 40, 30, 20, 10,
+                                    0, -10, -20, -30, -40, -50, -60, -70, -80, -90, -100,
+                                    -90, -80, -70, -60, -50, -40, -30, -20, -10
+                            };
+                default -> throw  new IllegalArgumentException("Invalid curve type: " + curveType);
+            };
+
+
         this.xPosCurve = 0;
         this.curveLength = 45;
         this.inputCurveArr = new long[this.curveLength];
