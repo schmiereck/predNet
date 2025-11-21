@@ -11,6 +11,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polyline;
 import javafx.util.Duration;
+import javafx.scene.shape.Line;
 
 public class PredNetViewController {
     @FXML
@@ -20,6 +21,7 @@ public class PredNetViewController {
     private Polyline inputLine;
     private Polyline outputLine;
     private Timeline timeline;
+    private Line zeroLine;
 
     public void init(final PredNetManagerService predNetManagerService) {
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSawtooth;
@@ -46,7 +48,11 @@ public class PredNetViewController {
         this.outputLine.setStroke(Color.BLUEVIOLET);
         this.outputLine.setStrokeWidth(4.0);
 
-        this.chartPane.getChildren().addAll(inputLine, outputLine);
+        this.zeroLine = new Line();
+        this.zeroLine.setStroke(Color.WHITE);
+        this.zeroLine.setStrokeWidth(2.0);
+
+        this.chartPane.getChildren().addAll(zeroLine, inputLine, outputLine);
     }
 
     private void startUpdates() {
@@ -72,6 +78,12 @@ public class PredNetViewController {
         double maxVal = 100.0; // bekannte Maximalwerte (Annahme)
         double minVal = -100.0; // bekannte Minimalwerte (Annahme)
         double range = maxVal - minVal;
+
+        double yZero = h - ((0.0 - minVal) / range) * (h - 20) - 10; // Null-Linie Y berechnet
+        this.zeroLine.setStartX(0);
+        this.zeroLine.setEndX(w);
+        this.zeroLine.setStartY(yZero);
+        this.zeroLine.setEndY(yZero);
 
         // wie viele Schritte in die Zukunft vorhergesagt wird
         final int predictionCount = this.predNetManagerService.retrieveNetOutputCurveLength();
