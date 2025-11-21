@@ -3,12 +3,12 @@ package de.schmiereck.prednet.service;
 public class CurveDto {
     private final long[] inputArr;
     private final long[] outputHistorieArr;
-    private final long output;
+    private final long[] outputArr;
 
-    public CurveDto(final long[] inputArr, final long[] outputHistorieArr, final long output) {
+    public CurveDto(final long[] inputArr, final long[] outputHistorieArr, final long[] outputArr) {
         this.inputArr = inputArr;
         this.outputHistorieArr = outputHistorieArr;
-        this.output = output;
+        this.outputArr = outputArr;
     }
 
     public long[] getInputArr() {
@@ -19,7 +19,7 @@ public class CurveDto {
         return this.outputHistorieArr;
     }
 
-    public long getOutput() {
-        return this.output;
+    public long[] getOutputArr() {
+        return this.outputArr;
     }
 }

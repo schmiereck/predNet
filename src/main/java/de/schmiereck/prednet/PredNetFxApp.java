@@ -1,5 +1,7 @@
 package de.schmiereck.prednet;
 
+import de.schmiereck.prednet.service.PredNetManagerService;
+import de.schmiereck.prednet.service.PredNetManagerServiceFactory;
 import de.schmiereck.prednet.service.PredNetService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -9,19 +11,18 @@ import javafx.stage.Stage;
 
 public class PredNetFxApp extends Application {
 
-    private PredNetService predNetService;
+    private PredNetManagerService predNetManagerService;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        final int curveType = 0;
-        this.predNetService = new PredNetService(curveType);
+        this.predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("prednet-view.fxml"));
         //FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(this.chartResource.getURL()));
         //final FXMLLoader fxmlLoader = new FXMLLoader(PredNetFxApp.class.getResource("classpath:/prednet-view.fxml"));
         Parent root = fxmlLoader.load();
         PredNetViewController controller = fxmlLoader.getController();
-        controller.init(this.predNetService);
+        controller.init(this.predNetManagerService);
 
         primaryStage.setTitle("PredNet Anzeige");
         primaryStage.setScene(new Scene(root));

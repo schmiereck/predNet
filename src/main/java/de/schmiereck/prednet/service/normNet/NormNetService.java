@@ -79,7 +79,8 @@ public class NormNetService {
             neuron.error = targetOutput - neuron.value;
 
             // Akkumuliere quadratischen Fehler
-            final long squaredError = (neuron.error * neuron.error);// / NormNeuron.MaxValue;
+            //final long squaredError = (neuron.error * neuron.error);// / NormNeuron.MaxValue;
+            final long squaredError = (neuron.error * neuron.error) / NormNeuron.MaxValue;
             totalError += squaredError;
         }
 

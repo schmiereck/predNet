@@ -1,6 +1,8 @@
 package de.schmiereck.prednet;
 
 import de.schmiereck.prednet.service.CurveDto;
+import de.schmiereck.prednet.service.PredNetManagerService;
+import de.schmiereck.prednet.service.PredNetManagerServiceFactory;
 import de.schmiereck.prednet.service.PredNetService;
 
 import java.util.concurrent.Executors;
@@ -12,17 +14,20 @@ public class PredNetMain {
         System.out.println("PredNet V1.0.0");
 
         final int curveType = 0;
-        final PredNetService predNetService = new PredNetService(curveType);
 
-        predNetService.calc(); // einmal initial berechnen
+        final PredNetManagerService predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
 
-        // Hintergrund-Thread: ruft alle 100 ms calc() auf
+        predNetManagerService.initNet(curveType);
+
+        predNetManagerService.runCalc(); // einmal initial berechnen
+
+        // Hintergrund-Thread: ruft alle 10 ms calc() auf
         final ScheduledExecutorService calcScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "PredNetCalc");
             t.setDaemon(true); // Daemon, damit JVM bei Ende des Hauptthreads beenden kann
             return t;
         });
-        calcScheduler.scheduleAtFixedRate(() -> predNetService.calc(), 0, 10, TimeUnit.MILLISECONDS);
+        calcScheduler.scheduleAtFixedRate(() -> predNetManagerService.runCalc(), 0, 10, TimeUnit.MILLISECONDS);
 
         // Zweiter Thread: zeigt alle 40 ms die Kurve an
         final ScheduledExecutorService showScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -30,7 +35,7 @@ public class PredNetMain {
             t.setDaemon(true); // ebenfalls Daemon
             return t;
         });
-        showScheduler.scheduleAtFixedRate(() -> showCurve(predNetService), 0, 40, TimeUnit.MILLISECONDS);
+        showScheduler.scheduleAtFixedRate(() -> showCurve(predNetManagerService), 0, 40, TimeUnit.MILLISECONDS);
 
         // Hauptthread bleibt eine Zeit lang aktiv, damit Ausgaben sichtbar sind
         Thread.sleep(2000); // 2 Sekunden Demo-Lauf
@@ -40,8 +45,8 @@ public class PredNetMain {
         showScheduler.shutdownNow();
     }
 
-    private static void showCurve(PredNetService predNetService) {
-        final CurveDto curveDto = predNetService.retrieveCurve();
+    private static void showCurve(final PredNetManagerService predNetManagerService) {
+        final CurveDto curveDto = predNetManagerService.retrieveCurve();
         final long[] inputArr = curveDto.getInputArr();
         for (int xPos = 0; xPos < inputArr.length; xPos++) {
             System.out.printf("%3d ", inputArr[xPos]);
@@ -51,7 +56,8 @@ public class PredNetMain {
         for (int xPos = 0; xPos < outputArr.length; xPos++) {
             System.out.printf("%3d ", outputArr[xPos]);
         }
-        System.out.printf(" : %3d", curveDto.getOutput());
+        //System.out.printf(" : %3d", curveDto.getOutputArr());
+        System.out.printf(" : %s", curveDto.getOutputArr());
         System.out.println();
     }
 }
