@@ -1,9 +1,6 @@
 package de.schmiereck.prednet;
 
-import de.schmiereck.prednet.service.CurveDto;
-import de.schmiereck.prednet.service.PredNetManagerService;
-import de.schmiereck.prednet.service.PredNetManagerServiceFactory;
-import de.schmiereck.prednet.service.PredNetService;
+import de.schmiereck.prednet.service.*;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -13,7 +10,7 @@ public class PredNetMain {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("PredNet V1.0.0");
 
-        final int curveType = 0;
+        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSawtooth;
 
         final PredNetManagerService predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
 

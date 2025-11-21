@@ -1,6 +1,7 @@
 package de.schmiereck.prednet;
 
 import de.schmiereck.prednet.service.CurveDto;
+import de.schmiereck.prednet.service.CurveGeneratorService;
 import de.schmiereck.prednet.service.PredNetManagerService;
 import de.schmiereck.prednet.service.PredNetManagerServiceFactory;
 import javafx.animation.KeyFrame;
@@ -21,9 +22,17 @@ public class PredNetViewController {
     private Timeline timeline;
 
     public void init(final PredNetManagerService predNetManagerService) {
+        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSawtooth;
+        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSlowSine;
+        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallSlowSine;
+        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigFastSine;
+        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
+        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.ModulatedSine;
+
         this.predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
-        final int curveType = 0;
+
         this.predNetManagerService.initNet(curveType);
+
         this.setupChart();
         this.startUpdates();
     }

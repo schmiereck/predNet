@@ -7,7 +7,7 @@ public class PredNetManagerService {
 
     private volatile int xPosCurve; // volatile für Sichtbarkeit zwischen Threads
 
-    private int[] precalcCurveArr;
+    private CurveGeneratorService.CurveType curveType;
     private volatile long[] inputCurveArr; // volatile Referenz, wird in calc() neu erzeugt
 
     private int curveLength;
@@ -23,19 +23,8 @@ public class PredNetManagerService {
         this.predNetService = new PredNetService();
     }
 
-    public void initNet(final int curveType) {
-        this.precalcCurveArr =
-                switch (curveType) {
-                    case 0 ->
-                            new int[]
-                                    {
-                                            0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
-                                            90, 80, 70, 60, 50, 40, 30, 20, 10,
-                                            0, -10, -20, -30, -40, -50, -60, -70, -80, -90, -100,
-                                            -90, -80, -70, -60, -50, -40, -30, -20, -10
-                                    };
-                    default -> throw  new IllegalArgumentException("Invalid curve type: " + curveType);
-                };
+    public void initNet(final CurveGeneratorService.CurveType curveType) {
+        this.curveType = curveType;
 
         this.xPosCurve = 0;
         this.netInputCurveLength = 8;//this.curveLength / 4;
@@ -56,14 +45,14 @@ public class PredNetManagerService {
 
         final long[] expectedOutputArr = new long[this.netOutputCurveLength];
         for (int outputPos = 0; outputPos < this.netOutputCurveLength; outputPos++) {
-            final long expectedOutput = this.precalcCurveArr[
-                    (this.xPosCurve + (this.curveLength) + (outputPos)) %
-                            this.precalcCurveArr.length];
+            final long expectedOutput = CurveGeneratorService.retrieveCurveValue(this.curveType,
+                    this.xPosCurve + (this.curveLength) + (outputPos));
             expectedOutputArr[outputPos] = expectedOutput;
         }
 
         // Nächste Position
-        final int nextXPos = (this.xPosCurve + 1) % this.precalcCurveArr.length;
+        //final int nextXPos = (this.xPosCurve + 1) % CurveGeneratorService.retrieveCurveLength(this.curveType);
+        final int nextXPos = (this.xPosCurve + 1);
         this.xPosCurve = nextXPos;
 
         final OutputDto outputDto = this.predNetService.runCalcOutput(this.inputCurveArr, expectedOutputArr);
@@ -80,7 +69,7 @@ public class PredNetManagerService {
         // Neues Array aufbauen (Copy-on-Write) statt In-Place Mutation
         final long[] newInputCurveArr = new long[this.curveLength];
         for (int posX = 0; posX < this.curveLength; posX++) {
-            newInputCurveArr[posX] = this.precalcCurveArr[(this.xPosCurve + posX) % this.precalcCurveArr.length];
+            newInputCurveArr[posX] = CurveGeneratorService.retrieveCurveValue(this.curveType,this.xPosCurve + posX);
         }
 
         // Veröffentlichung: zuerst das neue Array, dann den Index (oder umgekehrt; hier egal, beide volatile)
