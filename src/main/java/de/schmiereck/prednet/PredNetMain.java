@@ -56,7 +56,7 @@ public class PredNetMain {
         for (int xPos = 0; xPos < outputArr.length; xPos++) {
             System.out.printf("%3d ", outputArr[xPos]);
         }
-        //System.out.printf(" : %s", curveDto.outputArr());
+        //System.out.printf(" : %s", curveDto.outputCurveArr());
         System.out.println();
     }
 }

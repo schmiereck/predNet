@@ -7,6 +7,7 @@ import de.schmiereck.prednet.service.PredNetManagerServiceFactory;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polyline;
@@ -16,30 +17,46 @@ import javafx.scene.shape.Line;
 public class PredNetViewController {
     @FXML
     private Pane chartPane;
+    @FXML
+    private Button speed5Button;
+    @FXML
+    private Button speed10Button;
+    @FXML
+    private Button speed25Button;
+    @FXML
+    private Button speed50Button;
+    @FXML
+    private Button speed250Button;
+    @FXML
+    private Button speed500Button;
 
     private PredNetManagerService predNetManagerService;
-    private Polyline inputLine;
+    private Polyline expectedOutputHistorieLine;
+    private Polyline expectedOutputLine;
     private Polyline outputLine;
+    private Polyline outputHistorieLine;
     private Polyline extraLine;
     private Timeline timeline;
     private Line zeroLine;
     private Line startTrainLine;
     private Line endTrainLine;
+    private static final double DEFAULT_UPDATE_INTERVAL = 25.0D;
+    private double updateEveryMillis = DEFAULT_UPDATE_INTERVAL;
 
     public void init(final PredNetManagerService predNetManagerService) {
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSawtooth;
-        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSlowSine;
+        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSlowSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallSlowSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigFastSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
-        //final int netInputCurveLength = 8;
-        //final int netOutputCurveLength = 6;
-        //final int hiddenLayerCount = 3;
-        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.ModulatedSine;
-        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.Modulated2Sine;
-        final int netInputCurveLength = 16;
+        final int netInputCurveLength = 8;
         final int netOutputCurveLength = 6;
-        final int hiddenLayerCount = 6;
+        final int hiddenLayerCount = 3;
+        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.ModulatedSine;
+        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.Modulated2Sine;
+        //final int netInputCurveLength = 16;
+        //final int netOutputCurveLength = 6;
+        //final int hiddenLayerCount = 6;
 
         this.predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
 
@@ -47,18 +64,25 @@ public class PredNetViewController {
 
         this.setupChart();
 
-        final double updateEveryMillis = 25.0D;
-        this.startUpdates(updateEveryMillis);
+        this.switchUpdateInterval(DEFAULT_UPDATE_INTERVAL, this.speed25Button);
     }
 
     private void setupChart() {
-        this.inputLine = new Polyline();
-        this.inputLine.setStroke(Color.LIMEGREEN);
-        this.inputLine.setStrokeWidth(8.0);
+        this.expectedOutputHistorieLine = new Polyline();
+        this.expectedOutputHistorieLine.setStroke(Color.LIMEGREEN);
+        this.expectedOutputHistorieLine.setStrokeWidth(8.0);
+
+        this.expectedOutputLine = new Polyline();
+        this.expectedOutputLine.setStroke(Color.LIGHTGREEN);
+        this.expectedOutputLine.setStrokeWidth(8.0);
+
+        this.outputHistorieLine = new Polyline();
+        this.outputHistorieLine.setStroke(Color.BLUEVIOLET);
+        this.outputHistorieLine.setStrokeWidth(4.0);
 
         this.outputLine = new Polyline();
-        this.outputLine.setStroke(Color.BLUEVIOLET);
-        this.outputLine.setStrokeWidth(4.0);
+        this.outputLine.setStroke(Color.LIGHTBLUE);
+        this.outputLine.setStrokeWidth(6.0);
 
         this.extraLine = new Polyline();
         this.extraLine.setStroke(Color.DARKGOLDENROD);
@@ -74,25 +98,53 @@ public class PredNetViewController {
 
         this.endTrainLine = new Line();
         this.endTrainLine.setStroke(Color.DARKGREEN);
-        this.endTrainLine.setStrokeWidth(2.0);
+        this.endTrainLine.setStrokeWidth(6.0);
 
-        this.chartPane.getChildren().addAll(this.startTrainLine, this.endTrainLine, this.zeroLine, this.extraLine, this.inputLine, this.outputLine);
+        this.chartPane.getChildren().addAll(this.startTrainLine, this.endTrainLine,
+                this.zeroLine,
+                this.extraLine,
+                this.expectedOutputLine, this.expectedOutputHistorieLine,
+                this.outputLine, this.outputHistorieLine);
     }
 
-    private void startUpdates(final double updateEveryMillis) {
-        this.timeline = new Timeline(new KeyFrame(Duration.millis(updateEveryMillis), e -> this.updateCurves()));
+    private void startUpdates() {
+        if (this.timeline != null) {
+            this.timeline.stop();
+        }
+        this.timeline = new Timeline(new KeyFrame(Duration.millis(this.updateEveryMillis), e -> this.updateCurves()));
         this.timeline.setCycleCount(Timeline.INDEFINITE);
         this.timeline.play();
+    }
+
+    private void switchUpdateInterval(final double newIntervalMillis, final Button activeButton) {
+        this.updateEveryMillis = newIntervalMillis;
+        this.startUpdates();
+        this.updateSpeedButtonsState(activeButton);
+    }
+
+    private void updateSpeedButtonsState(final Button activeButton) {
+        final Button[] buttons = {this.speed5Button, this.speed10Button, this.speed25Button, this.speed50Button, this.speed250Button, this.speed500Button};
+        for (final Button button : buttons) {
+            if (button != null) {
+                button.setDisable(button == activeButton);
+            }
+        }
     }
 
     private void updateCurves() {
         this.predNetManagerService.runCalc(); // Berechnung anstoßen (alternativ getrennt, hier einfach integriert)
         final CurveDto curveDto = this.predNetManagerService.retrieveCurve();
-        final long[] inputHistorieCurveArr = curveDto.inputHistorieCurveArr();
+
+        final long[] expectedOutputHistorieArr = curveDto.expectedOutputHistorieArr();
+        final long[] expectedOutputArr = curveDto.expectedOutputArr();
+
         final long[] outputHistorieCurveArr = curveDto.outputHistorieCurveArr();
         final long[] inputCurveArr = curveDto.inputCurveArr();
+        final long[] outputCurveArr = curveDto.outputCurveArr();
 
-        this.inputLine.getPoints().clear();
+        this.expectedOutputLine.getPoints().clear();
+        this.expectedOutputHistorieLine.getPoints().clear();
+        this.outputHistorieLine.getPoints().clear();
         this.outputLine.getPoints().clear();
         this.extraLine.getPoints().clear();
 
@@ -113,22 +165,23 @@ public class PredNetViewController {
         final double minVal = -100.0D; // bekannte Minimalwerte (Annahme)
         final double range = maxVal - minVal;
 
-        final double dx = width / ((outputHistorieCurveArr.length));
+        final int curveLength = (expectedOutputHistorieArr.length + expectedOutputArr.length);
+        final double dx = width / (curveLength - 0);
 
         // Null-Linie Y berechnet:
         final double yZero = height - ((0.0D - minVal) / range) * (height - 20.0D) - 10.0D;
 
         this.zeroLine.setStartX(0);
         this.zeroLine.setStartY(yZero);
-        this.zeroLine.setEndX(outputHistorieCurveArr.length * dx);
+        this.zeroLine.setEndX((curveLength - 1) * dx);
         this.zeroLine.setEndY(yZero);
 
         final double maxYPos = calcYPos(height, minVal, range, maxVal);
         final double minYPos = calcYPos(height, minVal, range, minVal);
         final int netInputCurveLength = curveDto.netInputCurveLength();
         final int netOutputCurveLength = curveDto.netOutputCurveLength();
-        final double startTrainXPos = (outputHistorieCurveArr.length - netInputCurveLength - netOutputCurveLength) * dx;
-        final double endTrainXPos = (outputHistorieCurveArr.length - netOutputCurveLength) * dx;
+        final double startTrainXPos = ((expectedOutputHistorieArr.length) - (netInputCurveLength)) * dx;
+        final double endTrainXPos = ((expectedOutputHistorieArr.length - 1)) * dx;
 
         this.startTrainLine.setStartX(startTrainXPos);
         this.startTrainLine.setStartY(maxYPos);
@@ -140,20 +193,30 @@ public class PredNetViewController {
         this.endTrainLine.setEndX(endTrainXPos);
         this.endTrainLine.setEndY(minYPos);
 
-        for (int inputCurvePos = 0; inputCurvePos < inputCurveArr.length; inputCurvePos++) {
-            final double xInput = startTrainXPos + (inputCurvePos) * dx;
-            final double yInput = calcYPos(height, minVal, range, inputCurveArr[inputCurvePos]);
-            this.extraLine.getPoints().addAll(xInput, yInput);
+        for (int inputCurvePos = 0; inputCurvePos < expectedOutputHistorieArr.length; inputCurvePos++) {
+            final double xInput = inputCurvePos * dx;
+            final double yInput = calcYPos(height, minVal, range, expectedOutputHistorieArr[inputCurvePos]);
+            this.expectedOutputHistorieLine.getPoints().addAll(xInput, yInput);
+        }
+        for (int inputCurvePos = 0; inputCurvePos < expectedOutputArr.length; inputCurvePos++) {
+            final double xInput = ((expectedOutputHistorieArr.length) + inputCurvePos) * dx;
+            final double yInput = calcYPos(height, minVal, range, expectedOutputArr[inputCurvePos]);
+            this.expectedOutputLine.getPoints().addAll(xInput, yInput);
         }
 
-        for (int inputCurvePos = 0; inputCurvePos < inputHistorieCurveArr.length; inputCurvePos++) {
-            final double xInput = inputCurvePos * dx;
-            final double yInput = calcYPos(height, minVal, range, inputHistorieCurveArr[inputCurvePos]);
-            this.inputLine.getPoints().addAll(xInput, yInput);
+        for (int inputCurvePos = 0; inputCurvePos < inputCurveArr.length; inputCurvePos++) {
+            final double xInput = ((expectedOutputHistorieArr.length - inputCurveArr.length) + inputCurvePos) * dx;
+            final double yInput = calcYPos(height, minVal, range, inputCurveArr[inputCurvePos]);
+            this.extraLine.getPoints().addAll(xInput, yInput);
         }
         for (int outputCurvePos = 0; outputCurvePos < outputHistorieCurveArr.length; outputCurvePos++) {
             final double xOutput = (outputCurvePos) * dx; // Output ist eine Vorhersage in die Zukunft.
             final double yOutput = calcYPos(height, minVal, range, outputHistorieCurveArr[outputCurvePos]);
+            this.outputHistorieLine.getPoints().addAll(xOutput, yOutput);
+        }
+        for (int outputCurvePos = 0; outputCurvePos < outputCurveArr.length; outputCurvePos++) {
+            final double xOutput = (expectedOutputHistorieArr.length + outputCurvePos) * dx; // Output ist eine Vorhersage in die Zukunft.
+            final double yOutput = calcYPos(height, minVal, range, outputCurveArr[outputCurvePos]);
             this.outputLine.getPoints().addAll(xOutput, yOutput);
         }
     }
@@ -164,5 +227,35 @@ public class PredNetViewController {
 
     private static double calcYPos(final double height, final double minVal, final double range, final double value) {
         return height - ((value - minVal) / range) * (height - 20.0D) - 10.0D; // Padding 10
+    }
+
+    @FXML
+    private void handleSpeed5() {
+        this.switchUpdateInterval(5.0D, this.speed5Button);
+    }
+
+    @FXML
+    private void handleSpeed10() {
+        this.switchUpdateInterval(10.0D, this.speed10Button);
+    }
+
+    @FXML
+    private void handleSpeed25() {
+        this.switchUpdateInterval(25.0D, this.speed25Button);
+    }
+
+    @FXML
+    private void handleSpeed50() {
+        this.switchUpdateInterval(50.0D, this.speed50Button);
+    }
+
+    @FXML
+    private void handleSpeed250() {
+        this.switchUpdateInterval(250.0D, this.speed250Button);
+    }
+
+    @FXML
+    private void handleSpeed500() {
+        this.switchUpdateInterval(500.0D, this.speed500Button);
     }
 }

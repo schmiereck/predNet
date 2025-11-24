@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.BorderPane?>
 <BorderPane
@@ -13,5 +15,14 @@
     <center>
         <Pane fx:id="chartPane" prefWidth="600" prefHeight="300" style="-fx-background-color: #1e1e1e;" />
     </center>
+    <bottom>
+        <HBox spacing="8" style="-fx-padding:8; -fx-alignment:center;">
+            <Button fx:id="speed5Button" text="5 ms" onAction="#handleSpeed5" />
+            <Button fx:id="speed10Button" text="10 ms" onAction="#handleSpeed10" />
+            <Button fx:id="speed25Button" text="25 ms" onAction="#handleSpeed25" />
+            <Button fx:id="speed50Button" text="50 ms" onAction="#handleSpeed50" />
+            <Button fx:id="speed250Button" text="250 ms" onAction="#handleSpeed250" />
+            <Button fx:id="speed500Button" text="500 ms" onAction="#handleSpeed500" />
+        </HBox>
+    </bottom>
 </BorderPane>
-
