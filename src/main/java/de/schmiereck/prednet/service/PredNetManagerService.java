@@ -93,7 +93,7 @@ public class PredNetManagerService {
         final long[] inputArr = Arrays.copyOf(this.inputCurveArr, this.curveLength);
         final long[] outputArr = Arrays.copyOf(this.outputHistorieCurveArr, this.outputHistorieCurveArr.length);
 
-        return new CurveDto(inputArr, outputArr, this.outputArr);
+        return new CurveDto(inputArr, outputArr, this.outputArr, this.netInputCurveLength, this.netOutputCurveLength);
         //return this.predNetService.retrieveCurve();
     }
 

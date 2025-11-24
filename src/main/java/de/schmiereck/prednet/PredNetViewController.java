@@ -22,6 +22,8 @@ public class PredNetViewController {
     private Polyline outputLine;
     private Timeline timeline;
     private Line zeroLine;
+    private Line startTrainLine;
+    private Line endTrainLine;
 
     public void init(final PredNetManagerService predNetManagerService) {
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSawtooth;
@@ -52,7 +54,15 @@ public class PredNetViewController {
         this.zeroLine.setStroke(Color.WHITE);
         this.zeroLine.setStrokeWidth(2.0);
 
-        this.chartPane.getChildren().addAll(zeroLine, inputLine, outputLine);
+        this.startTrainLine = new Line();
+        this.startTrainLine.setStroke(Color.DARKGREEN);
+        this.startTrainLine.setStrokeWidth(2.0);
+
+        this.endTrainLine = new Line();
+        this.endTrainLine.setStroke(Color.DARKGREEN);
+        this.endTrainLine.setStrokeWidth(2.0);
+
+        this.chartPane.getChildren().addAll(this.startTrainLine, this.endTrainLine, this.zeroLine, this.inputLine, this.outputLine);
     }
 
     private void startUpdates() {
@@ -64,44 +74,81 @@ public class PredNetViewController {
     private void updateCurves() {
         this.predNetManagerService.runCalc(); // Berechnung anstoßen (alternativ getrennt, hier einfach integriert)
         final CurveDto curveDto = this.predNetManagerService.retrieveCurve();
-        long[] inputArr = curveDto.getInputArr();
-        long[] outputHistArr = curveDto.getOutputHistorieArr();
+        final long[] inputArr = curveDto.inputArr();
+        final long[] outputHistArr = curveDto.outputHistorieArr();
 
         this.inputLine.getPoints().clear();
         this.outputLine.getPoints().clear();
 
-        double w = this.chartPane.getWidth();
-        double h = this.chartPane.getHeight();
-        if (w <= 0) w = 600;
-        if (h <= 0) h = 300;
+        final double width;
+        final double height;
+        if (this.chartPane.getWidth() <= 0.0D) {
+            width = 600.0D;
+        } else {
+            width = this.chartPane.getWidth();
+        }
+        if (this.chartPane.getHeight() <= 0.0D) {
+            height = 300.0D;
+        } else {
+            height = this.chartPane.getHeight();
+        }
 
-        double maxVal = 100.0; // bekannte Maximalwerte (Annahme)
-        double minVal = -100.0; // bekannte Minimalwerte (Annahme)
-        double range = maxVal - minVal;
+        final double maxVal = 100.0D; // bekannte Maximalwerte (Annahme)
+        final double minVal = -100.0D; // bekannte Minimalwerte (Annahme)
+        final double range = maxVal - minVal;
 
-        double yZero = h - ((0.0 - minVal) / range) * (h - 20) - 10; // Null-Linie Y berechnet
+        final int inputLength = inputArr.length;
+        final int outputLength = outputHistArr.length;
+        //double dx = width / ((inputLength - 1) + predictionCount);
+        final double dx = width / ((outputLength - 1));
+
+        // Null-Linie Y berechnet:
+        final double yZero = height - ((0.0D - minVal) / range) * (height - 20.0D) - 10.0D;
+
         this.zeroLine.setStartX(0);
-        this.zeroLine.setEndX(w);
         this.zeroLine.setStartY(yZero);
+        this.zeroLine.setEndX(width);
         this.zeroLine.setEndY(yZero);
+
+        final double maxYPos = calcYPos(height, minVal, range, maxVal);
+        final double minYPos = calcYPos(height, minVal, range, minVal);
+        final int netInputCurveLength = curveDto.netInputCurveLength();
+        final int netOutputCurveLength = curveDto.netOutputCurveLength();
+        final double startTrainXPos = width - (((netOutputCurveLength)) * dx);
+        final double endTrainXPos = width - (((netInputCurveLength) + (netOutputCurveLength)) * dx);
+
+        this.startTrainLine.setStartX(startTrainXPos);
+        this.startTrainLine.setStartY(maxYPos);
+        this.startTrainLine.setEndX(startTrainXPos);
+        this.startTrainLine.setEndY(minYPos);
+
+        this.endTrainLine.setStartX(endTrainXPos);
+        this.endTrainLine.setStartY(maxYPos);
+        this.endTrainLine.setEndX(endTrainXPos);
+        this.endTrainLine.setEndY(minYPos);
 
         // wie viele Schritte in die Zukunft vorhergesagt wird
         final int predictionCount = this.predNetManagerService.retrieveNetOutputCurveLength();
 
-        int inputLength = inputArr.length;
-        int outputLength = outputHistArr.length;
-        //double dx = w / ((inputLength - 1) + predictionCount);
-        double dx = w / ((outputLength - 1));
-
         for (int inputCurvePos = 0; inputCurvePos < inputLength; inputCurvePos++) {
-            double xInput = inputCurvePos * dx;
-            double yInput = h - ((inputArr[inputCurvePos] - minVal) / range) * (h - 20) - 10; // Padding 10
+            final double xInput = inputCurvePos * dx;
+            //final double yInput = height - ((inputArr[inputCurvePos] - minVal) / range) * (height - 20.0D) - 10.0D; // Padding 10
+            final double yInput = calcYPos(height, minVal, range, inputArr[inputCurvePos]);
             this.inputLine.getPoints().addAll(xInput, yInput);
         }
         for (int outputCurvePos = 0; outputCurvePos < outputLength; outputCurvePos++) {
-            double xOutput = (outputCurvePos) * dx; // Output ist eine Vorhersage in die Zukunft.
-            double yOutput = h - ((outputHistArr[outputCurvePos] - minVal) / range) * (h - 20) - 10;
+            final double xOutput = (outputCurvePos) * dx; // Output ist eine Vorhersage in die Zukunft.
+            //final double yOutput = height - ((outputHistArr[outputCurvePos] - minVal) / range) * (height - 20.0D) - 10.0D;
+            final double yOutput = calcYPos(height, minVal, range, outputHistArr[outputCurvePos]);
             this.outputLine.getPoints().addAll(xOutput, yOutput);
         }
+    }
+
+    private static double calcYPos(final double height, final double minVal, final double range, final long value) {
+        return calcYPos(height, minVal, range, (double) value);
+    }
+
+    private static double calcYPos(final double height, final double minVal, final double range, final double value) {
+        return height - ((value - minVal) / range) * (height - 20.0D) - 10.0D; // Padding 10
     }
 }

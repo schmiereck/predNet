@@ -44,17 +44,17 @@ public class PredNetMain {
 
     private static void showCurve(final PredNetManagerService predNetManagerService) {
         final CurveDto curveDto = predNetManagerService.retrieveCurve();
-        final long[] inputArr = curveDto.getInputArr();
+        final long[] inputArr = curveDto.inputArr();
         for (int xPos = 0; xPos < inputArr.length; xPos++) {
             System.out.printf("%3d ", inputArr[xPos]);
         }
         System.out.print(" |  ");
-        final long[] outputArr = curveDto.getOutputHistorieArr();
+        final long[] outputArr = curveDto.outputHistorieArr();
         for (int xPos = 0; xPos < outputArr.length; xPos++) {
             System.out.printf("%3d ", outputArr[xPos]);
         }
         //System.out.printf(" : %3d", curveDto.getOutputArr());
-        System.out.printf(" : %s", curveDto.getOutputArr());
+        System.out.printf(" : %s", curveDto.outputArr());
         System.out.println();
     }
 }
