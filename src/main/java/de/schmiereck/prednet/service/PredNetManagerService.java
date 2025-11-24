@@ -23,7 +23,8 @@ public class PredNetManagerService {
     }
 
     public void initNet(final CurveGeneratorService.CurveType curveType,
-                        final int netInputCurveLength, final int netOutputCurveLength) {
+                        final int netInputCurveLength, final int netOutputCurveLength,
+                        final int hiddenLayerCount) {
         this.curveType = curveType;
 
         this.netInputCurveLength = netInputCurveLength;
@@ -31,7 +32,7 @@ public class PredNetManagerService {
 
         this.xPosCurve = 0;
 
-        this.predNetService.initNet(this.netInputCurveLength, this.netOutputCurveLength);
+        this.predNetService.initNet(this.netInputCurveLength, this.netOutputCurveLength, hiddenLayerCount);
 
         this.inputCurveArr = null;
         this.historieCurveLength = 45;

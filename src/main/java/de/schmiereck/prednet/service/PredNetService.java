@@ -14,14 +14,21 @@ public class PredNetService {
     public PredNetService() {
     }
 
-    public void initNet(final int inputCurveLength, final int outputCurveLength) {
-        final int[] layerNeuronCounts = new int[] {
-                inputCurveLength,
-                inputCurveLength * 2,
-                inputCurveLength * 2,
-                inputCurveLength * 2,
-                outputCurveLength
-        };
+    public void initNet(final int inputCurveLength, final int outputCurveLength, final int hiddenLayerCount) {
+        //final int[] layerNeuronCounts = new int[] {
+        //        inputCurveLength,
+        //        inputCurveLength * 2,
+        //        inputCurveLength * 2,
+        //        inputCurveLength * 2,
+        //        outputCurveLength
+        //};
+        final int[] layerNeuronCounts = new int[1 + hiddenLayerCount + 1];
+        layerNeuronCounts[0] = inputCurveLength;
+        for (int hiddenLayerPos = 0; hiddenLayerPos < hiddenLayerCount; hiddenLayerPos++) {
+            layerNeuronCounts[1 + hiddenLayerPos] = (inputCurveLength * 2);
+        }
+        layerNeuronCounts[1 + hiddenLayerCount] = outputCurveLength;
+
         this.net = NormNetService.initNet(layerNeuronCounts);
     }
 

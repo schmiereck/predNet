@@ -32,14 +32,17 @@ public class PredNetViewController {
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigFastSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.ModulatedSine;
+        //final int netInputCurveLength = 8;
+        //final int netOutputCurveLength = 6;
+        //final int hiddenLayerCount = 3;
         final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.Modulated2Sine;
-
-        final int netInputCurveLength = 8;
+        final int netInputCurveLength = 16;
         final int netOutputCurveLength = 6;
+        final int hiddenLayerCount = 6;
 
         this.predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
 
-        this.predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength);
+        this.predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount);
 
         this.setupChart();
 
