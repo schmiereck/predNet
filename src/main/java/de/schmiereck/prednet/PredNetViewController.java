@@ -20,6 +20,7 @@ public class PredNetViewController {
     private PredNetManagerService predNetManagerService;
     private Polyline inputLine;
     private Polyline outputLine;
+    private Polyline extraLine;
     private Timeline timeline;
     private Line zeroLine;
     private Line startTrainLine;
@@ -31,10 +32,10 @@ public class PredNetViewController {
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallSlowSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigFastSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
-        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.ModulatedSine;
         //final int netInputCurveLength = 8;
         //final int netOutputCurveLength = 6;
         //final int hiddenLayerCount = 3;
+        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.ModulatedSine;
         final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.Modulated2Sine;
         final int netInputCurveLength = 16;
         final int netOutputCurveLength = 6;
@@ -46,7 +47,7 @@ public class PredNetViewController {
 
         this.setupChart();
 
-        final double updateEveryMillis = 50.0D;
+        final double updateEveryMillis = 25.0D;
         this.startUpdates(updateEveryMillis);
     }
 
@@ -58,6 +59,10 @@ public class PredNetViewController {
         this.outputLine = new Polyline();
         this.outputLine.setStroke(Color.BLUEVIOLET);
         this.outputLine.setStrokeWidth(4.0);
+
+        this.extraLine = new Polyline();
+        this.extraLine.setStroke(Color.DARKGOLDENROD);
+        this.extraLine.setStrokeWidth(12.0);
 
         this.zeroLine = new Line();
         this.zeroLine.setStroke(Color.WHITE);
@@ -71,7 +76,7 @@ public class PredNetViewController {
         this.endTrainLine.setStroke(Color.DARKGREEN);
         this.endTrainLine.setStrokeWidth(2.0);
 
-        this.chartPane.getChildren().addAll(this.startTrainLine, this.endTrainLine, this.zeroLine, this.inputLine, this.outputLine);
+        this.chartPane.getChildren().addAll(this.startTrainLine, this.endTrainLine, this.zeroLine, this.extraLine, this.inputLine, this.outputLine);
     }
 
     private void startUpdates(final double updateEveryMillis) {
@@ -83,11 +88,13 @@ public class PredNetViewController {
     private void updateCurves() {
         this.predNetManagerService.runCalc(); // Berechnung anstoßen (alternativ getrennt, hier einfach integriert)
         final CurveDto curveDto = this.predNetManagerService.retrieveCurve();
-        final long[] inputArr = curveDto.inputCurveArr();
-        final long[] outputHistArr = curveDto.outputHistorieCurveArr();
+        final long[] inputHistorieCurveArr = curveDto.inputHistorieCurveArr();
+        final long[] outputHistorieCurveArr = curveDto.outputHistorieCurveArr();
+        final long[] inputCurveArr = curveDto.inputCurveArr();
 
         this.inputLine.getPoints().clear();
         this.outputLine.getPoints().clear();
+        this.extraLine.getPoints().clear();
 
         final double width;
         final double height;
@@ -106,25 +113,22 @@ public class PredNetViewController {
         final double minVal = -100.0D; // bekannte Minimalwerte (Annahme)
         final double range = maxVal - minVal;
 
-        final int inputLength = inputArr.length;
-        final int outputLength = outputHistArr.length;
-        //double dx = width / ((inputLength - 1) + predictionCount);
-        final double dx = width / ((outputLength - 1));
+        final double dx = width / ((outputHistorieCurveArr.length));
 
         // Null-Linie Y berechnet:
         final double yZero = height - ((0.0D - minVal) / range) * (height - 20.0D) - 10.0D;
 
         this.zeroLine.setStartX(0);
         this.zeroLine.setStartY(yZero);
-        this.zeroLine.setEndX(width);
+        this.zeroLine.setEndX(outputHistorieCurveArr.length * dx);
         this.zeroLine.setEndY(yZero);
 
         final double maxYPos = calcYPos(height, minVal, range, maxVal);
         final double minYPos = calcYPos(height, minVal, range, minVal);
         final int netInputCurveLength = curveDto.netInputCurveLength();
         final int netOutputCurveLength = curveDto.netOutputCurveLength();
-        final double startTrainXPos = width - (((netOutputCurveLength)) * dx);
-        final double endTrainXPos = width - (((netInputCurveLength) + (netOutputCurveLength)) * dx);
+        final double startTrainXPos = (outputHistorieCurveArr.length - netInputCurveLength - netOutputCurveLength) * dx;
+        final double endTrainXPos = (outputHistorieCurveArr.length - netOutputCurveLength) * dx;
 
         this.startTrainLine.setStartX(startTrainXPos);
         this.startTrainLine.setStartY(maxYPos);
@@ -136,19 +140,20 @@ public class PredNetViewController {
         this.endTrainLine.setEndX(endTrainXPos);
         this.endTrainLine.setEndY(minYPos);
 
-        // wie viele Schritte in die Zukunft vorhergesagt wird
-        final int predictionCount = this.predNetManagerService.retrieveNetOutputCurveLength();
+        for (int inputCurvePos = 0; inputCurvePos < inputCurveArr.length; inputCurvePos++) {
+            final double xInput = startTrainXPos + (inputCurvePos) * dx;
+            final double yInput = calcYPos(height, minVal, range, inputCurveArr[inputCurvePos]);
+            this.extraLine.getPoints().addAll(xInput, yInput);
+        }
 
-        for (int inputCurvePos = 0; inputCurvePos < inputLength; inputCurvePos++) {
+        for (int inputCurvePos = 0; inputCurvePos < inputHistorieCurveArr.length; inputCurvePos++) {
             final double xInput = inputCurvePos * dx;
-            //final double yInput = height - ((inputCurveArr[inputCurvePos] - minVal) / range) * (height - 20.0D) - 10.0D; // Padding 10
-            final double yInput = calcYPos(height, minVal, range, inputArr[inputCurvePos]);
+            final double yInput = calcYPos(height, minVal, range, inputHistorieCurveArr[inputCurvePos]);
             this.inputLine.getPoints().addAll(xInput, yInput);
         }
-        for (int outputCurvePos = 0; outputCurvePos < outputLength; outputCurvePos++) {
+        for (int outputCurvePos = 0; outputCurvePos < outputHistorieCurveArr.length; outputCurvePos++) {
             final double xOutput = (outputCurvePos) * dx; // Output ist eine Vorhersage in die Zukunft.
-            //final double yOutput = height - ((outputHistArr[outputCurvePos] - minVal) / range) * (height - 20.0D) - 10.0D;
-            final double yOutput = calcYPos(height, minVal, range, outputHistArr[outputCurvePos]);
+            final double yOutput = calcYPos(height, minVal, range, outputHistorieCurveArr[outputCurvePos]);
             this.outputLine.getPoints().addAll(xOutput, yOutput);
         }
     }

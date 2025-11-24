@@ -6,6 +6,7 @@ public class PredNetManagerService {
     private final PredNetService predNetService;
 
     private CurveGeneratorService.CurveType curveType;
+    private volatile long[] inputHistorieCurveArr; // volatile Referenz, wird in calc() neu erzeugt
     private volatile long[] inputCurveArr; // volatile Referenz, wird in calc() neu erzeugt
 
     private int historieCurveLength;
@@ -42,7 +43,9 @@ public class PredNetManagerService {
     }
 
     public void runCalc() {
-        this.inputCurveArr = calcInputCurve(this.curveType, this.xPosCurve, this.historieCurveLength);
+        this.inputHistorieCurveArr = calcInputCurve(this.curveType, this.xPosCurve, this.historieCurveLength);
+        this.inputCurveArr = calcInputCurve(this.curveType,
+                this.xPosCurve + (this.historieCurveLength - this.netInputCurveLength), this.netInputCurveLength);
 
         final long[] expectedOutputArr = new long[this.netOutputCurveLength];
         for (int outputPos = 0; outputPos < this.netOutputCurveLength; outputPos++) {
@@ -50,11 +53,6 @@ public class PredNetManagerService {
                     this.xPosCurve + (this.historieCurveLength) + (outputPos));
             expectedOutputArr[outputPos] = expectedOutput;
         }
-
-        // Nächste Position
-        //final int nextXPos = (this.xPosCurve + 1) % CurveGeneratorService.retrieveCurveLength(this.curveType);
-        final int nextXPos = (this.xPosCurve + 1);
-        this.xPosCurve = nextXPos;
 
         final OutputDto outputDto = this.predNetService.runCalcOutput(this.inputCurveArr, expectedOutputArr);
         final long[] newOutputArr = outputDto.outputArr();
@@ -67,6 +65,9 @@ public class PredNetManagerService {
                     printArray(newOutputArr),
                     outputDto.mse());
         }
+
+        // Nächste Position
+        this.xPosCurve = (this.xPosCurve + 1);
         this.iterationPos++;
     }
 
@@ -107,13 +108,9 @@ public class PredNetManagerService {
 
     public CurveDto retrieveCurve() {
         // neue Kopie für den DTO (Isolation vom Hintergrund-Array)
-        final long[] inputCurveArr = Arrays.copyOf(this.inputCurveArr, this.historieCurveLength);
+        final long[] inputHistorieCurveArr = Arrays.copyOf(this.inputHistorieCurveArr, this.historieCurveLength);
         final long[] outputHistorieCurveArr = Arrays.copyOf(this.outputHistorieCurveArr, this.outputHistorieCurveArr.length);
 
-        return new CurveDto(inputCurveArr, outputHistorieCurveArr, this.netInputCurveLength, this.netOutputCurveLength);
-    }
-
-    public int retrieveNetOutputCurveLength() {
-        return this.netOutputCurveLength;
+        return new CurveDto(inputHistorieCurveArr, outputHistorieCurveArr, this.netInputCurveLength, this.netOutputCurveLength, this.inputCurveArr);
     }
 }

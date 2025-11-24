@@ -47,7 +47,7 @@ public class PredNetMain {
 
     private static void showCurve(final PredNetManagerService predNetManagerService) {
         final CurveDto curveDto = predNetManagerService.retrieveCurve();
-        final long[] inputArr = curveDto.inputCurveArr();
+        final long[] inputArr = curveDto.inputHistorieCurveArr();
         for (int xPos = 0; xPos < inputArr.length; xPos++) {
             System.out.printf("%3d ", inputArr[xPos]);
         }
