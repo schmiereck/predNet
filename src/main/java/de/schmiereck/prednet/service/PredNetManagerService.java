@@ -5,17 +5,16 @@ import java.util.Arrays;
 public class PredNetManagerService {
     private final PredNetService predNetService;
 
-    private volatile int xPosCurve; // volatile für Sichtbarkeit zwischen Threads
-
     private CurveGeneratorService.CurveType curveType;
     private volatile long[] inputCurveArr; // volatile Referenz, wird in calc() neu erzeugt
 
-    private int curveLength;
-    private volatile long[] outputArr; // volatile Referenz, wird in calc() neu erzeugt
+    private int historieCurveLength;
     private volatile long[] outputHistorieCurveArr; // volatile Referenz, wird in calc() neu erzeugt
 
     private int netInputCurveLength;
     private int netOutputCurveLength;
+
+    private volatile int xPosCurve; // volatile für Sichtbarkeit zwischen Threads
 
     private long iterationPos;
 
@@ -23,30 +22,31 @@ public class PredNetManagerService {
         this.predNetService = new PredNetService();
     }
 
-    public void initNet(final CurveGeneratorService.CurveType curveType) {
+    public void initNet(final CurveGeneratorService.CurveType curveType,
+                        final int netInputCurveLength, final int netOutputCurveLength) {
         this.curveType = curveType;
 
+        this.netInputCurveLength = netInputCurveLength;
+        this.netOutputCurveLength = netOutputCurveLength;
+
         this.xPosCurve = 0;
-        this.netInputCurveLength = 8;//this.curveLength / 4;
-        this.netOutputCurveLength = 6;
 
         this.predNetService.initNet(this.netInputCurveLength, this.netOutputCurveLength);
-        this.inputCurveArr = new long[this.curveLength];
 
-        this.curveLength = 45;
-        this.outputArr = null;
-        this.outputHistorieCurveArr = new long[this.curveLength];
+        this.inputCurveArr = null;
+        this.historieCurveLength = 45;
+        this.outputHistorieCurveArr = new long[this.historieCurveLength];
 
         this.iterationPos = 0;
     }
 
     public void runCalc() {
-        this.calcInputCurve();
+        this.inputCurveArr = calcInputCurve(this.curveType, this.xPosCurve, this.historieCurveLength);
 
         final long[] expectedOutputArr = new long[this.netOutputCurveLength];
         for (int outputPos = 0; outputPos < this.netOutputCurveLength; outputPos++) {
             final long expectedOutput = CurveGeneratorService.retrieveCurveValue(this.curveType,
-                    this.xPosCurve + (this.curveLength) + (outputPos));
+                    this.xPosCurve + (this.historieCurveLength) + (outputPos));
             expectedOutputArr[outputPos] = expectedOutput;
         }
 
@@ -56,45 +56,60 @@ public class PredNetManagerService {
         this.xPosCurve = nextXPos;
 
         final OutputDto outputDto = this.predNetService.runCalcOutput(this.inputCurveArr, expectedOutputArr);
-        this.outputArr = outputDto.outputArr();
-        this.calcOutputHistorieCurve(this.outputArr);
+        final long[] newOutputArr = outputDto.outputArr();
+        this.outputHistorieCurveArr = calcOutputHistorieCurve(this.historieCurveLength, this.netOutputCurveLength,
+                this.outputHistorieCurveArr, newOutputArr);
 
         if (this.iterationPos % 13 == 0) {
-            System.out.printf("Iter: %6d, Exp: %s, Out: %s, MSE: %13d%n", this.iterationPos, expectedOutputArr, this.outputArr, outputDto.mse());
+            System.out.printf("Iter: %6d, Exp: %s, Out: %s, MSE: %13d%n", this.iterationPos,
+                    printArray(expectedOutputArr),
+                    printArray(newOutputArr),
+                    outputDto.mse());
         }
         this.iterationPos++;
     }
 
-    private void calcInputCurve() {
-        // Neues Array aufbauen (Copy-on-Write) statt In-Place Mutation
-        final long[] newInputCurveArr = new long[this.curveLength];
-        for (int posX = 0; posX < this.curveLength; posX++) {
-            newInputCurveArr[posX] = CurveGeneratorService.retrieveCurveValue(this.curveType,this.xPosCurve + posX);
+    private static String printArray(final long[] arr) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < arr.length; i++) {
+            sb.append(String.format("%3d", arr[i]));
+            if (i < (arr.length - 1)) {
+                sb.append(", ");
+            }
         }
-
-        // Veröffentlichung: zuerst das neue Array, dann den Index (oder umgekehrt; hier egal, beide volatile)
-        this.inputCurveArr = newInputCurveArr;
+        sb.append("]");
+        return sb.toString();
     }
 
-    private void calcOutputHistorieCurve(final long[] outputArr) {
-        final long[] newOutputArr = new long[this.curveLength + this.netOutputCurveLength];
-        for (int posX = 0; posX < (this.outputHistorieCurveArr.length - 1); posX++) {
-            newOutputArr[posX] = this.outputHistorieCurveArr[posX + 1];
+    private static long[] calcInputCurve(final CurveGeneratorService.CurveType curveType, final int xPosCurve, final int historieCurveLength) {
+        // Neues Array aufbauen (Copy-on-Write) statt In-Place Mutation
+        final long[] newInputCurveArr = new long[historieCurveLength];
+        for (int posX = 0; posX < historieCurveLength; posX++) {
+            newInputCurveArr[posX] = CurveGeneratorService.retrieveCurveValue(curveType,xPosCurve + posX);
+        }
+        return newInputCurveArr;
+    }
+
+    private static long[] calcOutputHistorieCurve(final int historieCurveLength, final int netOutputCurveLength,
+                                           final long[] oldOutputHistorieCurveArr, final long[] newOutputArr) {
+        final long[] newOutputHistorieCurveArr = new long[historieCurveLength + netOutputCurveLength];
+        for (int posX = 0; posX < (oldOutputHistorieCurveArr.length - 1); posX++) {
+            newOutputHistorieCurveArr[posX] = oldOutputHistorieCurveArr[posX + 1];
         }
 
-        for (int posX = 0; posX < this.netOutputCurveLength; posX++) {
-            newOutputArr[(newOutputArr.length - 1) - ((this.netOutputCurveLength - 1) - posX)] = outputArr[posX];
+        for (int posX = 0; posX < netOutputCurveLength; posX++) {
+            newOutputHistorieCurveArr[(newOutputHistorieCurveArr.length - 1) - ((netOutputCurveLength - 1) - posX)] = newOutputArr[posX];
         }
-        this.outputHistorieCurveArr = newOutputArr;
+        return newOutputHistorieCurveArr;
     }
 
     public CurveDto retrieveCurve() {
         // neue Kopie für den DTO (Isolation vom Hintergrund-Array)
-        final long[] inputArr = Arrays.copyOf(this.inputCurveArr, this.curveLength);
-        final long[] outputArr = Arrays.copyOf(this.outputHistorieCurveArr, this.outputHistorieCurveArr.length);
+        final long[] inputCurveArr = Arrays.copyOf(this.inputCurveArr, this.historieCurveLength);
+        final long[] outputHistorieCurveArr = Arrays.copyOf(this.outputHistorieCurveArr, this.outputHistorieCurveArr.length);
 
-        return new CurveDto(inputArr, outputArr, this.outputArr, this.netInputCurveLength, this.netOutputCurveLength);
-        //return this.predNetService.retrieveCurve();
+        return new CurveDto(inputCurveArr, outputHistorieCurveArr, this.netInputCurveLength, this.netOutputCurveLength);
     }
 
     public int retrieveNetOutputCurveLength() {

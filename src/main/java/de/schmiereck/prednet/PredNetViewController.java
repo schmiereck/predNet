@@ -31,14 +31,20 @@ public class PredNetViewController {
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallSlowSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigFastSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
-        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.ModulatedSine;
+        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.ModulatedSine;
+        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.Modulated2Sine;
+
+        final int netInputCurveLength = 8;
+        final int netOutputCurveLength = 6;
 
         this.predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
 
-        this.predNetManagerService.initNet(curveType);
+        this.predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength);
 
         this.setupChart();
-        this.startUpdates();
+
+        final double updateEveryMillis = 50.0D;
+        this.startUpdates(updateEveryMillis);
     }
 
     private void setupChart() {
@@ -65,8 +71,8 @@ public class PredNetViewController {
         this.chartPane.getChildren().addAll(this.startTrainLine, this.endTrainLine, this.zeroLine, this.inputLine, this.outputLine);
     }
 
-    private void startUpdates() {
-        this.timeline = new Timeline(new KeyFrame(Duration.millis(50), e -> updateCurves()));
+    private void startUpdates(final double updateEveryMillis) {
+        this.timeline = new Timeline(new KeyFrame(Duration.millis(updateEveryMillis), e -> this.updateCurves()));
         this.timeline.setCycleCount(Timeline.INDEFINITE);
         this.timeline.play();
     }
@@ -74,8 +80,8 @@ public class PredNetViewController {
     private void updateCurves() {
         this.predNetManagerService.runCalc(); // Berechnung anstoßen (alternativ getrennt, hier einfach integriert)
         final CurveDto curveDto = this.predNetManagerService.retrieveCurve();
-        final long[] inputArr = curveDto.inputArr();
-        final long[] outputHistArr = curveDto.outputHistorieArr();
+        final long[] inputArr = curveDto.inputCurveArr();
+        final long[] outputHistArr = curveDto.outputHistorieCurveArr();
 
         this.inputLine.getPoints().clear();
         this.outputLine.getPoints().clear();
@@ -132,7 +138,7 @@ public class PredNetViewController {
 
         for (int inputCurvePos = 0; inputCurvePos < inputLength; inputCurvePos++) {
             final double xInput = inputCurvePos * dx;
-            //final double yInput = height - ((inputArr[inputCurvePos] - minVal) / range) * (height - 20.0D) - 10.0D; // Padding 10
+            //final double yInput = height - ((inputCurveArr[inputCurvePos] - minVal) / range) * (height - 20.0D) - 10.0D; // Padding 10
             final double yInput = calcYPos(height, minVal, range, inputArr[inputCurvePos]);
             this.inputLine.getPoints().addAll(xInput, yInput);
         }

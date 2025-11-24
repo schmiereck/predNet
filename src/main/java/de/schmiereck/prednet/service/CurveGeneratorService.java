@@ -10,7 +10,8 @@ public class CurveGeneratorService {
         BigSlowSine,
         SmallSlowSine,
 
-        ModulatedSine
+        ModulatedSine,
+        Modulated2Sine
     }
 
     private static int[] precalcSawtoothCurveArr = new int[]
@@ -30,8 +31,16 @@ public class CurveGeneratorService {
             case SmallSlowSine -> (int) (40.0D * Math.sin((2.0D * Math.PI / 100.0D) * timeStep));
             case ModulatedSine -> (int) (45.0D *
                         (
-                            (Math.sin((2.0D * Math.PI /  20.0D) * timeStep)) +
-                            (Math.sin((2.0D * Math.PI / 100.0D) * timeStep))
+                            (Math.sin((2.0D * Math.PI /  20.0D) * timeStep)) + // Fast sine.
+                            (Math.sin((2.0D * Math.PI / 100.0D) * timeStep)) // Slow sine as offset.
+                        )
+                    );
+            case Modulated2Sine -> (int) (45.0D *
+                        (
+                            ((Math.sin((2.0D * Math.PI / 80.0D) * timeStep) * // Amplitude modulation...
+                                    Math.sin((2.0D * Math.PI /  20.0D) * timeStep)) // ...of fast sine.
+                                    ) +
+                            (Math.sin((2.0D * Math.PI / 100.0D) * timeStep)) // Add slow sine as offset.
                         )
                     );
         };

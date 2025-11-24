@@ -19,7 +19,7 @@ public class PredNetService {
                 inputCurveLength,
                 inputCurveLength * 2,
                 inputCurveLength * 2,
-                inputCurveLength,
+                inputCurveLength * 2,
                 outputCurveLength
         };
         this.net = NormNetService.initNet(layerNeuronCounts);

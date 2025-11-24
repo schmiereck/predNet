@@ -14,7 +14,9 @@ public class PredNetMain {
 
         final PredNetManagerService predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
 
-        predNetManagerService.initNet(curveType);
+        final int netInputCurveLength = 8;
+        final int netOutputCurveLength = 6;
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength);
 
         predNetManagerService.runCalc(); // einmal initial berechnen
 
@@ -44,17 +46,16 @@ public class PredNetMain {
 
     private static void showCurve(final PredNetManagerService predNetManagerService) {
         final CurveDto curveDto = predNetManagerService.retrieveCurve();
-        final long[] inputArr = curveDto.inputArr();
+        final long[] inputArr = curveDto.inputCurveArr();
         for (int xPos = 0; xPos < inputArr.length; xPos++) {
             System.out.printf("%3d ", inputArr[xPos]);
         }
         System.out.print(" |  ");
-        final long[] outputArr = curveDto.outputHistorieArr();
+        final long[] outputArr = curveDto.outputHistorieCurveArr();
         for (int xPos = 0; xPos < outputArr.length; xPos++) {
             System.out.printf("%3d ", outputArr[xPos]);
         }
-        //System.out.printf(" : %3d", curveDto.getOutputArr());
-        System.out.printf(" : %s", curveDto.outputArr());
+        //System.out.printf(" : %s", curveDto.outputArr());
         System.out.println();
     }
 }
