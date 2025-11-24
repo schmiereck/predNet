@@ -17,7 +17,8 @@ public class PredNetMain {
         final int netInputCurveLength = 8;
         final int netOutputCurveLength = 6;
         final int hiddenLayerCount = 3;
-        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount);
+        final boolean useOutputAsInput = false;
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, useOutputAsInput);
 
         predNetManagerService.runCalc(); // einmal initial berechnen
 

@@ -36,6 +36,7 @@ public class PredNetManagerService {
     private volatile int xPosCurve; // volatile für Sichtbarkeit zwischen Threads
 
     private long iterationPos;
+    private boolean useOutputAsInput;
 
     public PredNetManagerService() {
         this.predNetService = new PredNetService();
@@ -43,23 +44,32 @@ public class PredNetManagerService {
 
     public void initNet(final CurveGeneratorService.CurveType curveType,
                         final int netInputCurveLength, final int netOutputCurveLength,
-                        final int hiddenLayerCount) {
+                        final int hiddenLayerCount,
+                        final boolean useOutputAsInput) {
         this.curveType = curveType;
 
         this.curveLength = 45;
 
         this.netInputCurveLength = netInputCurveLength;
         this.inputCurveArr = null;
-        this.outputCurveArr = null;
+        this.outputCurveArr = new long[netOutputCurveLength];
         this.inputHistorieCurveArr = null;
 
         this.netOutputCurveLength = netOutputCurveLength;
         this.expectedOutputArr = null;
         this.expectedOutputHistorieArr = null;
 
+        this.useOutputAsInput = useOutputAsInput;
+
         this.xPosCurve = 0;
 
-        this.predNetService.initNet(this.netInputCurveLength, this.netOutputCurveLength, hiddenLayerCount);
+        if (this.useOutputAsInput) {
+            this.predNetService.initNet(this.netInputCurveLength + this.netOutputCurveLength,
+                    this.netOutputCurveLength, hiddenLayerCount);
+        } else {
+            this.predNetService.initNet(this.netInputCurveLength,
+                    this.netOutputCurveLength, hiddenLayerCount);
+        }
 
         this.outputHistorieCurveLength = this.curveLength - this.netOutputCurveLength;
         this.outputHistorieCurveArr = new long[this.outputHistorieCurveLength +  this.netOutputCurveLength];
@@ -71,10 +81,15 @@ public class PredNetManagerService {
         this.inputHistorieCurveArr = calcInputCurve(this.curveType,
                 this.xPosCurve,
                 this.outputHistorieCurveLength);
-        this.inputCurveArr = calcInputCurve(this.curveType,
-                this.xPosCurve + (this.curveLength - (this.netOutputCurveLength + this.netInputCurveLength)),
-                this.netInputCurveLength);
-
+        if (this.useOutputAsInput) {
+            this.inputCurveArr = calcInputCurve(this.curveType,
+                    this.xPosCurve + (this.curveLength - (this.netOutputCurveLength + this.netInputCurveLength)),
+                    this.netInputCurveLength, this.netOutputCurveLength, this.outputCurveArr);
+        } else {
+            this.inputCurveArr = calcInputCurve(this.curveType,
+                    this.xPosCurve + (this.curveLength - (this.netOutputCurveLength + this.netInputCurveLength)),
+                    this.netInputCurveLength);
+        }
         this.expectedOutputHistorieArr = calcExpectedOutputArr(this.curveType,
                 this.xPosCurve,
                  this.curveLength - this.netOutputCurveLength);
@@ -100,11 +115,25 @@ public class PredNetManagerService {
     }
 
     private static long[] calcInputCurve(final CurveGeneratorService.CurveType curveType, final int xPosCurve,
-                                         final int historieCurveLength) {
+                                         final int curveLength) {
         // Neues Array aufbauen (Copy-on-Write) statt In-Place Mutation
-        final long[] newInputCurveArr = new long[historieCurveLength];
-        for (int posX = 0; posX < historieCurveLength; posX++) {
+        final long[] newInputCurveArr = new long[curveLength];
+        for (int posX = 0; posX < curveLength; posX++) {
             newInputCurveArr[posX] = CurveGeneratorService.retrieveCurveValue(curveType,xPosCurve + posX);
+        }
+        return newInputCurveArr;
+    }
+
+    private static long[] calcInputCurve(final CurveGeneratorService.CurveType curveType, final int xPosCurve,
+                                         final int inputCurveLength, final int outputCurveLength,
+                                         final long[] outputCurveArr) {
+        // Neues Array aufbauen (Copy-on-Write) statt In-Place Mutation
+        final long[] newInputCurveArr = new long[inputCurveLength + outputCurveLength];
+        for (int posX = 0; posX < inputCurveLength; posX++) {
+            newInputCurveArr[posX] = CurveGeneratorService.retrieveCurveValue(curveType,xPosCurve + posX);
+        }
+        for (int posX = 0; posX < outputCurveLength; posX++) {
+            newInputCurveArr[inputCurveLength + posX] = outputCurveArr[posX];
         }
         return newInputCurveArr;
     }
@@ -146,7 +175,7 @@ public class PredNetManagerService {
         final StringBuilder sb = new StringBuilder();
         sb.append("[");
         for (int i = 0; i < arr.length; i++) {
-            sb.append(String.format("%3d", arr[i]));
+            sb.append(String.format("%4d", arr[i]));
             if (i < (arr.length - 1)) {
                 sb.append(", ");
             }

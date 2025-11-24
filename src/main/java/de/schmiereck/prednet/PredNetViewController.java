@@ -57,10 +57,11 @@ public class PredNetViewController {
         //final int netInputCurveLength = 16;
         //final int netOutputCurveLength = 6;
         //final int hiddenLayerCount = 6;
+        final boolean useOutputAsInput = true;
 
         this.predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
 
-        this.predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount);
+        this.predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, useOutputAsInput);
 
         this.setupChart();
 
@@ -205,7 +206,7 @@ public class PredNetViewController {
         }
 
         for (int inputCurvePos = 0; inputCurvePos < inputCurveArr.length; inputCurvePos++) {
-            final double xInput = ((expectedOutputHistorieArr.length - inputCurveArr.length) + inputCurvePos) * dx;
+            final double xInput = ((expectedOutputHistorieArr.length - netInputCurveLength) + inputCurvePos) * dx;
             final double yInput = calcYPos(height, minVal, range, inputCurveArr[inputCurvePos]);
             this.extraLine.getPoints().addAll(xInput, yInput);
         }
