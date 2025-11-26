@@ -3,7 +3,11 @@ package de.schmiereck.prednet.service.normNet;
 import java.util.Random;
 
 public class NormNetService {
-    private static final Random random = new Random(42); // Fixer Seed für Reproduzierbarkeit
+    private static Random random = new Random(42); // Fixer Seed für Reproduzierbarkeit
+
+    public static void initNewRandomWithSeed(final long seed) {
+        random = new Random(seed);
+    }
 
     public static NormNet initNet(final int[] layerNeuronCounts) {
         final NormNet net = new NormNet();

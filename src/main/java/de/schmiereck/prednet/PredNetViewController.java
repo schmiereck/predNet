@@ -59,13 +59,15 @@ public class PredNetViewController {
         //final int netInputCurveLength = 16;
         //final int netOutputCurveLength = 6;
         //final int hiddenLayerCount = 6;
-        //final boolean useOutputAsInput = false;
-        // Very difficult:
-        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.Modulated2Sine;
-        //final int netInputCurveLength = 16+8;
-        //final int netOutputCurveLength = 6;
-        //final int hiddenLayerCount = 6+3;
         //final boolean useOutputAsInput = true;
+        // Very difficult:
+        /*
+        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.Modulated2Sine;
+        final int netInputCurveLength = 16+8;
+        final int netOutputCurveLength = 6;
+        final int hiddenLayerCount = 6+3;
+        final boolean useOutputAsInput = true;
+        */
         // Very good with useOutputAsInput as Memory (Nearly impossible without):
         final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
         final int netInputCurveLength = 1;  // Only 1 input value to predict the next 6 output values.

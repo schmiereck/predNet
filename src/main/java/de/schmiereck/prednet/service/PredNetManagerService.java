@@ -35,6 +35,8 @@ public class PredNetManagerService {
 
     private volatile int xPosCurve; // volatile für Sichtbarkeit zwischen Threads
 
+    private long mse;
+
     private long iterationPos;
     private boolean useOutputAsInput;
 
@@ -102,6 +104,8 @@ public class PredNetManagerService {
         this.outputHistorieCurveArr = calcOutputHistorieCurve(this.outputHistorieCurveLength, this.netOutputCurveLength,
                 this.outputHistorieCurveArr, this.outputCurveArr);
 
+        this.mse = outputDto.mse();
+
         if (this.iterationPos % 13 == 0) {
             System.out.printf("Iter: %6d, Exp: %s, Out: %s, MSE: %13d%n", this.iterationPos,
                     printArray(expectedOutputArr),
@@ -168,7 +172,7 @@ public class PredNetManagerService {
         final long[] outputHistorieCurveArr = Arrays.copyOf(this.outputHistorieCurveArr, this.outputHistorieCurveArr.length);
 
         return new CurveDto(inputHistorieCurveArr, outputHistorieCurveArr, this.netInputCurveLength, this.netOutputCurveLength, this.inputCurveArr,
-                this.expectedOutputHistorieArr, this.expectedOutputArr, this.outputCurveArr);
+                this.expectedOutputHistorieArr, this.expectedOutputArr, this.outputCurveArr, this.mse);
     }
 
     private static String printArray(final long[] arr) {
