@@ -1,5 +1,7 @@
 package de.schmiereck.prednet.service;
 
+import de.schmiereck.prednet.service.normNet.NormNetService;
+
 import java.util.Arrays;
 
 /**
@@ -48,6 +50,18 @@ public class PredNetManagerService {
                         final int netInputCurveLength, final int netOutputCurveLength,
                         final int hiddenLayerCount,
                         final boolean useOutputAsInput) {
+        final boolean useLoopbackMemory = false;
+        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.None;
+
+        this.initNet(curveType, netInputCurveLength, netOutputCurveLength,
+                hiddenLayerCount, useOutputAsInput, loopbackType);
+    }
+
+    public void initNet(final CurveGeneratorService.CurveType curveType,
+                        final int netInputCurveLength, final int netOutputCurveLength,
+                        final int hiddenLayerCount,
+                        final boolean useOutputAsInput,
+                        final NormNetService.LoopbackType loopbackType) {
         this.curveType = curveType;
 
         this.curveLength = 45;
@@ -67,7 +81,7 @@ public class PredNetManagerService {
 
         if (this.useOutputAsInput) {
             this.predNetService.initNet(this.netInputCurveLength + this.netOutputCurveLength,
-                    this.netOutputCurveLength, hiddenLayerCount);
+                    this.netOutputCurveLength, hiddenLayerCount, loopbackType);
         } else {
             this.predNetService.initNet(this.netInputCurveLength,
                     this.netOutputCurveLength, hiddenLayerCount);

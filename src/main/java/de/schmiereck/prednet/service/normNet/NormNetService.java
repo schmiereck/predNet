@@ -5,11 +5,22 @@ import java.util.Random;
 public class NormNetService {
     private static Random random = new Random(42); // Fixer Seed für Reproduzierbarkeit
 
+    public enum LoopbackType {
+        None,
+        Neuron,
+        ParentNeuron
+    }
+
     public static void initNewRandomWithSeed(final long seed) {
         random = new Random(seed);
     }
 
-    public static NormNet initNet(final int[] layerNeuronCounts) {
+    public NormNet initNet(final int[] layerNeuronCounts) {
+        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.None;
+        return initNet(layerNeuronCounts, loopbackType);
+    }
+
+    public NormNet initNet(final int[] layerNeuronCounts, final LoopbackType loopbackType) {
         final NormNet net = new NormNet();
 
         // Create neurons:
@@ -31,6 +42,31 @@ public class NormNetService {
                         final NormSynapse synapse = new NormSynapse(parentLayerNeuron, calcInitWeight(inputCount), neuron);
                         neuron.parentSynapseList.add(synapse);
                         parentLayerNeuron.childSynapseList.add(synapse);
+                    }
+                    if ((loopbackType != LoopbackType.None) && (neuronType == NormNeuron.NeuronType.Hidden)) {
+                        // Add loopback memory synapse.
+                        switch (loopbackType) {
+                            case Neuron -> {
+                                final NormSynapse loopbackSynapse = new NormSynapse(neuron, calcInitWeight(inputCount), neuron);
+                                loopbackSynapse.loopback = true;
+                                neuron.parentSynapseList.add(loopbackSynapse);
+                                neuron.childSynapseList.add(loopbackSynapse);
+                            }
+                            case ParentNeuron -> {
+                                final NormNeuron parentLayerNeuron = parentLayerNeuronArr[neuronPos];
+                                final NormSynapse loopbackSynapse = new NormSynapse(parentLayerNeuron, calcInitWeight(inputCount), neuron);
+                                loopbackSynapse.loopback = true;
+                                parentLayerNeuron.parentSynapseList.add(loopbackSynapse);
+                                neuron.childSynapseList.add(loopbackSynapse);
+                            }
+                        }
+                        //final NormSynapse loopbackSynapse = new NormSynapse(neuron, calcInitWeight(inputCount), neuron);
+                        final NormNeuron parentLayerNeuron = parentLayerNeuronArr[neuronPos];
+                        final NormSynapse loopbackSynapse = new NormSynapse(parentLayerNeuron, calcInitWeight(inputCount), neuron);
+                        loopbackSynapse.loopback = true;
+                        //neuron.parentSynapseList.add(loopbackSynapse);
+                        parentLayerNeuron.parentSynapseList.add(loopbackSynapse);
+                        neuron.childSynapseList.add(loopbackSynapse);
                     }
                     // Add bias synapse.
                     final NormSynapse synapse = new NormSynapse(net.biasNeuron, calcInitWeight(inputCount), neuron);
@@ -74,7 +110,7 @@ public class NormNetService {
                         randomValue * NormNeuron.MaxValue));
     }
 
-    public static long calcError(final NormNet net, final long[] targetOutputArr) {
+    public long calcError(final NormNet net, final long[] targetOutputArr) {
         long totalError = NormNeuron.NullValue;
 
         for (int neuronPos = 0; neuronPos < net.outputNeuronList.size(); neuronPos++) {
@@ -109,6 +145,12 @@ public class NormNetService {
         neuron.error = (neuron.error * calcActivationDerivative(neuron.value)) / NormNeuron.MaxValue;
     }
 
+    private static void calcError(final NormNeuron neuron, final NormSynapse synapse) {
+        final NormNeuron childNeuron = synapse.childNeuron;
+        final long propagatedError = (childNeuron.error * synapse.weight) / NormNeuron.MaxValue;
+        neuron.error += propagatedError;
+    }
+
     /**
      * Ableitung der Hard Tanh Aktivierungsfunktion.
      * Gibt 1 (= MaxValue) zurück wenn nicht gesättigt, sonst 0.
@@ -119,13 +161,8 @@ public class NormNetService {
         }
         return NormNeuron.MaxValue; // Linear → Gradient = 1
     }
-    private static void calcError(final NormNeuron neuron, final NormSynapse synapse) {
-        final NormNeuron childNeuron = synapse.childNeuron;
-        final long propagatedError = (childNeuron.error * synapse.weight) / NormNeuron.MaxValue;
-        neuron.error += propagatedError;
-    }
 
-    public static void calcValue(final NormNet net, final long[] inputArr) {
+    public void calcValue(final NormNet net, final long[] inputArr) {
         for (int neuronPos = 0; neuronPos < net.inputNeuronList.size(); neuronPos++) {
             final NormNeuron neuron = net.inputNeuronList.get(neuronPos);
             neuron.value = inputArr[neuronPos];
@@ -141,21 +178,30 @@ public class NormNetService {
         long sumValue = NormNeuron.NullValue;
         for (final NormSynapse synapse : neuron.parentSynapseList) {
             final NormNeuron parentNeuron = synapse.parentNeuron;
+            final long parentValue;
+            if (synapse.loopback) {
+                // Verwende gespeicherten Wert für Loopback Synapse.
+                parentValue = parentNeuron.lastValue;
+            } else {
+                parentValue = parentNeuron.value;
+            }
             // Value anhand aller parent Synapsen des Neuron:
-            sumValue += (parentNeuron.value * synapse.weight) / NormNeuron.MaxValue;
+            sumValue += (parentValue * synapse.weight) / NormNeuron.MaxValue;
         }
+        final long neuronLastValue = neuron.value;
         neuron.value = calcActivation(sumValue);
+        neuron.lastValue = (neuronLastValue + neuron.value) / 2; // Durchschnittswert als lastValue speichern
     }
 
     /**
      * Lineare Aktivierungsfunktion (mit Clipping).
      * Hard Tanh (Hard Hyperbolic Tangent).
      */
-    public static long calcActivation(final long value) {
+    private static long calcActivation(final long value) {
         return Math.max(NormNeuron.MinValue, Math.min(NormNeuron.MaxValue, value));
     }
 
-    public static void calcTrain(final NormNet net, final long learningRate) {
+    public void calcTrain(final NormNet net, final long learningRate) {
         // Aktualisiere alle Gewichte basierend auf den berechneten Fehlern
         for (final NormNeuron neuron : net.neuronList) {
             if (neuron.neuronType != NormNeuron.NeuronType.Input) {
@@ -167,7 +213,8 @@ public class NormNetService {
     private static void updateWeights(final NormNeuron neuron, final long learningRate) {
         for (final NormSynapse synapse : neuron.parentSynapseList) {
             // Berechne Gewichtsanpassung: deltaWeight = learningRate * error * parentValue
-            final long parentValue = synapse.parentNeuron.value;
+            //final long parentValue = synapse.parentNeuron.value;
+            final long parentValue = synapse.loopback ? synapse.parentNeuron.lastValue : synapse.parentNeuron.value;
             //final long deltaWeight = (learningRate * neuron.error * parentValue) / (NormNeuron.MaxValue * NormNeuron.MaxValue);
             // Erst error × parentValue, dann × learningRate
             final long errorTimesValue = (neuron.error * parentValue) / NormNeuron.MaxValue;

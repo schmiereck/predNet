@@ -12,6 +12,7 @@ public class NormNeuron {
 
     public final NeuronType neuronType;
     public long value;
+    public long lastValue;
     public long error;
     public final List<NormSynapse> parentSynapseList = new ArrayList<>();
     public final List<NormSynapse> childSynapseList = new ArrayList<>();

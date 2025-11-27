@@ -9,7 +9,8 @@ class NormNetService_WHEN_initNet_is_called_Test {
     void GIVEN_3_layer_THEN_net_initialized() {
         final int[] layerNeuronCounts = new int[]{2, 3, 2};
         final int extraNeuronCount = 1; // Bias neuron
-        final NormNet net = NormNetService.initNet(layerNeuronCounts);
+        final NormNetService normNetService = new NormNetService();
+        final NormNet net = normNetService.initNet(layerNeuronCounts);
 
         // Check total neuron count
         final int expectedTotalNeurons = 2 + 3 + 2;

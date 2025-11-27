@@ -9,7 +9,8 @@ public class NormNetService_WHEN_calcValue_is_called_Test {
     @Test
     void GIVEN_2_layer_net_THEN_output_calculated() {
         final int[] layerNeuronCounts = new int[]{2, 2};
-        final NormNet net = NormNetService.initNet(layerNeuronCounts);
+        final NormNetService normNetService = new NormNetService();
+        final NormNet net = normNetService.initNet(layerNeuronCounts);
 
         net.neuronList.get(2).parentSynapseList.get(0).weight = 100_000; // 0.1 in NormNeuron representation
         net.neuronList.get(2).parentSynapseList.get(1).weight = 200_000; // 0.2 in NormNeuron representation
@@ -21,7 +22,7 @@ public class NormNetService_WHEN_calcValue_is_called_Test {
 
         final long[] inputArr = new long[]{ 500, 1_000 };
 
-        NormNetService.calcValue(net, inputArr);
+        normNetService.calcValue(net, inputArr);
 
         // Max	1000000
         // Bias	1000000

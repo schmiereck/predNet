@@ -8,7 +8,8 @@ public class NormNetService_WHEN_calcError_is_called_Test {
     @Test
     void GIVEN_3_layer_THEN_net_initialized() {
         final int[] layerNeuronCounts = new int[]{ 2, 2, 2 };
-        final NormNet net = NormNetService.initNet(layerNeuronCounts);
+        final NormNetService normNetService = new NormNetService();
+        final NormNet net = normNetService.initNet(layerNeuronCounts);
 
         for (final NormNeuron neuron : net.neuronList) {
             for (final NormSynapse synapse : neuron.parentSynapseList) {
@@ -24,7 +25,7 @@ public class NormNetService_WHEN_calcError_is_called_Test {
         final long l2n1i = 1_000;
         final long[] targetOutputArr = new long[]{ l2n0i, l2n1i };
 
-        NormNetService.calcError(net, targetOutputArr);
+        normNetService.calcError(net, targetOutputArr);
 
         // Assert Outputs:
         final long l2n0e = l2n0i - 0;
