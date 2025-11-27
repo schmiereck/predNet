@@ -1,25 +1,12 @@
 package de.schmiereck.prednet.service.normNet;
 
+import de.schmiereck.prednet.service.baseNet.BaseNetService;
+
 import java.util.Random;
 
-public class NormNetService {
-    private static Random random = new Random(42); // Fixer Seed für Reproduzierbarkeit
+public class NormNetService extends BaseNetService {
 
-    public enum LoopbackType {
-        None,
-        Neuron,
-        ParentNeuron
-    }
-
-    public static void initNewRandomWithSeed(final long seed) {
-        random = new Random(seed);
-    }
-
-    public NormNet initNet(final int[] layerNeuronCounts) {
-        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.None;
-        return initNet(layerNeuronCounts, loopbackType);
-    }
-
+    @Override
     public NormNet initNet(final int[] layerNeuronCounts, final LoopbackType loopbackType) {
         final NormNet net = new NormNet();
 
@@ -110,6 +97,7 @@ public class NormNetService {
                         randomValue * NormNeuron.MaxValue));
     }
 
+    @Override
     public long calcError(final NormNet net, final long[] targetOutputArr) {
         long totalError = NormNeuron.NullValue;
 
@@ -162,6 +150,7 @@ public class NormNetService {
         return NormNeuron.MaxValue; // Linear → Gradient = 1
     }
 
+    @Override
     public void calcValue(final NormNet net, final long[] inputArr) {
         for (int neuronPos = 0; neuronPos < net.inputNeuronList.size(); neuronPos++) {
             final NormNeuron neuron = net.inputNeuronList.get(neuronPos);
@@ -201,6 +190,7 @@ public class NormNetService {
         return Math.max(NormNeuron.MinValue, Math.min(NormNeuron.MaxValue, value));
     }
 
+    @Override
     public void calcTrain(final NormNet net, final long learningRate) {
         // Aktualisiere alle Gewichte basierend auf den berechneten Fehlern
         for (final NormNeuron neuron : net.neuronList) {
