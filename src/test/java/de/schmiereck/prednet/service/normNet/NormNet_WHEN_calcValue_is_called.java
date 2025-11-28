@@ -50,7 +50,7 @@ public class NormNet_WHEN_calcValue_is_called {
     }
 
     @Test
-    void GIVEN_weight_1000L_loopback_THEN_100L_output() {
+    void GIVEN_weight_100_000L_loopback_THEN_100L_output() {
         final NormNetService normNetService = new NormNetService();
         final NormNet net = new NormNet();
 

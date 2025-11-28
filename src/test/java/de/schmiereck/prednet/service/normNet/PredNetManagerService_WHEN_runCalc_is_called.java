@@ -4,6 +4,7 @@ import de.schmiereck.prednet.service.CurveDto;
 import de.schmiereck.prednet.service.CurveGeneratorService;
 import de.schmiereck.prednet.service.PredNetManagerService;
 import de.schmiereck.prednet.service.PredNetManagerServiceFactory;
+import de.schmiereck.prednet.service.baseNet.BaseNetService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -76,7 +77,7 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
     }
 
     @Test
-    void GIVEN_SmallFastSine_input_8_THEN_curve_learned() {
+    void GIVEN_SmallFastSine_input_8_loopback_None_THEN_curve_learned() {
         final var predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
         NormNetService.initNewRandomWithSeed(42L);
 
@@ -85,10 +86,28 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
         final int netOutputCurveLength = 6;
         final int hiddenLayerCount = 3;
         final boolean useOutputAsInput = false;
+        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.None;
 
-        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, useOutputAsInput);
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, useOutputAsInput, loopbackType);
 
-        assertCurveLearned(predNetManagerService, 50_000, 1L, 3_000);
+        assertCurveLearned(predNetManagerService, 50_000, 1L, 2_900);
+    }
+
+    @Test
+    void GIVEN_SmallFastSine_input_8_loopback_Neuron_THEN_curve_learned() {
+        final var predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
+        NormNetService.initNewRandomWithSeed(42L);
+
+        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
+        final int netInputCurveLength = 8;
+        final int netOutputCurveLength = 6;
+        final int hiddenLayerCount = 3;
+        final boolean useOutputAsInput = false;
+        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.Neuron;
+
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, useOutputAsInput, loopbackType);
+
+        assertCurveLearned(predNetManagerService, 50_000, 1L, 2_900);
     }
 
     @Test

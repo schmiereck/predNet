@@ -125,17 +125,27 @@ public class NormNetService extends BaseNetService {
     }
 
     private static void calcError(final NormNeuron neuron) {
+        final long oldParentError = neuron.error;
         neuron.error = NormNeuron.NullValue;
-        for (final NormSynapse synapse : neuron.childSynapseList) {
-            calcError(neuron, synapse);
+        for (final NormSynapse childSynapse : neuron.childSynapseList) {
+            if (childSynapse.loopback) {
+                calcLoopbackError(neuron, childSynapse, oldParentError);
+            } else {
+                calcError(neuron, childSynapse);
+            }
         }
         // Multipliziere mit Ableitung der Aktivierungsfunktion
         neuron.error = (neuron.error * calcActivationDerivative(neuron.value)) / NormNeuron.MaxValue;
     }
 
-    private static void calcError(final NormNeuron neuron, final NormSynapse synapse) {
-        final NormNeuron childNeuron = synapse.childNeuron;
-        final long propagatedError = (childNeuron.error * synapse.weight) / NormNeuron.MaxValue;
+    private static void calcError(final NormNeuron neuron, final NormSynapse childSynapse) {
+        final NormNeuron childNeuron = childSynapse.childNeuron;
+        final long propagatedError = (childNeuron.error * childSynapse.weight) / NormNeuron.MaxValue;
+        neuron.error += propagatedError;
+    }
+
+    private static void calcLoopbackError(final NormNeuron neuron, final NormSynapse childSynapse, final long oldParentError) {
+        final long propagatedError = (oldParentError * childSynapse.weight) / NormNeuron.MaxValue;
         neuron.error += propagatedError;
     }
 

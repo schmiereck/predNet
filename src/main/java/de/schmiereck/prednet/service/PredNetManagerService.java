@@ -50,7 +50,6 @@ public class PredNetManagerService {
                         final int netInputCurveLength, final int netOutputCurveLength,
                         final int hiddenLayerCount,
                         final boolean useOutputAsInput) {
-        final boolean useLoopbackMemory = false;
         final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.None;
 
         this.initNet(curveType, netInputCurveLength, netOutputCurveLength,
