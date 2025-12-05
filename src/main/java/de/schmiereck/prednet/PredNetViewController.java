@@ -46,59 +46,83 @@ public class PredNetViewController {
     private double updateEveryMillis = DEFAULT_UPDATE_INTERVAL;
 
     public void init(final PredNetManagerService predNetManagerService) {
-        // Very good:
-        /*
-         */
-        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSawtooth;
-        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSlowSine;
-        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallSlowSine;
-        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigFastSine;
-        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
-        final int netInputCurveLength = 8;
-        final int netOutputCurveLength = 6;
-        final int hiddenLayerCount = 3;
-        final boolean useOutputAsInput = false;
-        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.None;
+        final int testCase = 3;
 
-        // Very good:
-        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.ModulatedSine;
-        //final int netInputCurveLength = 16;
-        //final int netOutputCurveLength = 6;
-        //final int hiddenLayerCount = 6;
-        //final boolean useOutputAsInput = true;
+        final CurveGeneratorService.CurveType curveType;
+        final int netInputCurveLength;
+        final int netOutputCurveLength;
+        final int hiddenLayerCount;
+        final int hiddenLayerNeuronCount;
+        final boolean useOutputAsInput;
+        final NormNetService.LoopbackType loopbackType;
 
-        // Very difficult:
-        /*
-        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.Modulated2Sine;
-        final int netInputCurveLength = 16+8;
-        final int netOutputCurveLength = 6;
-        final int hiddenLayerCount = 6+3;
-        final boolean useOutputAsInput = true;
-        */
-
-        // Very good with useOutputAsInput as Memory (Nearly impossible without):
-        /*
-        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
-        final int netInputCurveLength = 1;  // Only 1 input value to predict the next 6 output values.
-        final int netOutputCurveLength = 6;
-        final int hiddenLayerCount = 3;
-        final boolean useOutputAsInput = true;
-        */
-
-        // Very good with useOutputAsInput as Memory (Nearly impossible without):
-        /*
-        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
-        final int netInputCurveLength = 1;  // Only 1 input value to predict the next 6 output values.
-        final int netOutputCurveLength = 6;
-        final int hiddenLayerCount = 12;
-        final boolean useOutputAsInput = false;
-        //final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.Neuron;
-        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.ParentNeuron;
-         */
+        switch(testCase) {
+            case 0 -> {
+                // Very good:
+                /*
+                 */
+                //curveType = CurveGeneratorService.CurveType.BigSawtooth;
+                //curveType = CurveGeneratorService.CurveType.BigSlowSine;
+                //curveType = CurveGeneratorService.CurveType.SmallSlowSine;
+                curveType = CurveGeneratorService.CurveType.BigFastSine;
+                //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
+                netInputCurveLength = 8;
+                netOutputCurveLength = 6;
+                hiddenLayerCount = 3;
+                hiddenLayerNeuronCount = netInputCurveLength * 2;
+                useOutputAsInput = false;
+                loopbackType = NormNetService.LoopbackType.None;
+            }
+            case 1 -> {
+                // Very good:
+                curveType = CurveGeneratorService.CurveType.ModulatedSine;
+                netInputCurveLength = 16;
+                netOutputCurveLength = 6;
+                hiddenLayerCount = 6;
+                hiddenLayerNeuronCount = netInputCurveLength * 2;
+                useOutputAsInput = true;
+                loopbackType = NormNetService.LoopbackType.None;
+            }
+            case 2 -> {
+                // Very difficult:
+                curveType = CurveGeneratorService.CurveType.Modulated2Sine;
+                netInputCurveLength = 16+8;
+                netOutputCurveLength = 6;
+                hiddenLayerCount = 6+3;
+                hiddenLayerNeuronCount = netInputCurveLength * 2;
+                useOutputAsInput = true;
+                loopbackType = NormNetService.LoopbackType.None;
+            }
+            case 3 -> {
+                // Very good with useOutputAsInput as Memory (Nearly impossible without):
+                curveType = CurveGeneratorService.CurveType.SmallFastSine;
+                netInputCurveLength = 1;  // Only 1 input value to predict the next 6 output values.
+                netOutputCurveLength = 6;
+                hiddenLayerCount = 3;
+                hiddenLayerNeuronCount = 6;
+                useOutputAsInput = true;    // But Output used as Input.
+                loopbackType = NormNetService.LoopbackType.None;
+            }
+            case 4 -> {
+                // Very good with useOutputAsInput as Memory (Nearly impossible without):
+                curveType = CurveGeneratorService.CurveType.SmallFastSine;
+                netInputCurveLength = 1;  // Only 1 input value to predict the next 6 output values.
+                netOutputCurveLength = 6;
+                hiddenLayerCount = 12;
+                hiddenLayerNeuronCount = 12;
+                useOutputAsInput = false;   // No Output used as Input.
+                loopbackType = NormNetService.LoopbackType.None;
+                //loopbackType = NormNetService.LoopbackType.Neuron;
+                //loopbackType = NormNetService.LoopbackType.ParentNeuron;
+            }
+            default -> throw new IllegalArgumentException("Invalid test case");
+        }
 
         this.predNetManagerService = predNetManagerService;
 
-        this.predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, useOutputAsInput, loopbackType);
+        this.predNetManagerService.initNet(curveType,
+                netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount,
+                useOutputAsInput, loopbackType);
 
         this.setupChart();
 

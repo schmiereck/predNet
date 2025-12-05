@@ -48,17 +48,17 @@ public class PredNetManagerService {
 
     public void initNet(final CurveGeneratorService.CurveType curveType,
                         final int netInputCurveLength, final int netOutputCurveLength,
-                        final int hiddenLayerCount,
+                        final int hiddenLayerCount, final int hiddenLayerNeuronCount,
                         final boolean useOutputAsInput) {
         final BaseNetService.LoopbackType loopbackType = BaseNetService.LoopbackType.None;
 
         this.initNet(curveType, netInputCurveLength, netOutputCurveLength,
-                hiddenLayerCount, useOutputAsInput, loopbackType);
+                hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
     }
 
     public void initNet(final CurveGeneratorService.CurveType curveType,
                         final int netInputCurveLength, final int netOutputCurveLength,
-                        final int hiddenLayerCount,
+                        final int hiddenLayerCount, final int hiddenLayerNeuronCount,
                         final boolean useOutputAsInput,
                         final BaseNetService.LoopbackType loopbackType) {
         this.curveType = curveType;
@@ -80,10 +80,10 @@ public class PredNetManagerService {
 
         if (this.useOutputAsInput) {
             this.predNetService.initNet(this.netInputCurveLength + this.netOutputCurveLength,
-                    this.netOutputCurveLength, hiddenLayerCount, loopbackType);
+                    this.netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, loopbackType);
         } else {
             this.predNetService.initNet(this.netInputCurveLength,
-                    this.netOutputCurveLength, hiddenLayerCount);
+                    this.netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount);
         }
 
         this.outputHistorieCurveLength = this.curveLength - this.netOutputCurveLength;

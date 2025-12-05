@@ -17,12 +17,14 @@ public class PredNetService {
         //this.netService = new IntegrationNetService();
     }
 
-    public void initNet(final int inputCurveLength, final int outputCurveLength, final int hiddenLayerCount) {
+    public void initNet(final int inputCurveLength, final int outputCurveLength, final int hiddenLayerCount,
+                        final int hiddenLayerNeuronCount) {
         final BaseNetService.LoopbackType loopbackType = BaseNetService.LoopbackType.None;
-        this.initNet(inputCurveLength, outputCurveLength, hiddenLayerCount, loopbackType);
+        this.initNet(inputCurveLength, outputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, loopbackType);
     }
 
     public void initNet(final int inputCurveLength, final int outputCurveLength, final int hiddenLayerCount,
+                        final int hiddenLayerNeuronCount,
                         final BaseNetService.LoopbackType loopbackType) {
         //final int[] layerNeuronCounts = new int[] {
         //        inputCurveLength,
@@ -34,7 +36,8 @@ public class PredNetService {
         final int[] layerNeuronCounts = new int[1 + hiddenLayerCount + 1];
         layerNeuronCounts[0] = inputCurveLength;
         for (int hiddenLayerPos = 0; hiddenLayerPos < hiddenLayerCount; hiddenLayerPos++) {
-            layerNeuronCounts[1 + hiddenLayerPos] = (inputCurveLength * 2);
+            //layerNeuronCounts[1 + hiddenLayerPos] = (inputCurveLength * 2);
+            layerNeuronCounts[1 + hiddenLayerPos] = hiddenLayerNeuronCount;
         }
         layerNeuronCounts[1 + hiddenLayerCount] = outputCurveLength;
 
