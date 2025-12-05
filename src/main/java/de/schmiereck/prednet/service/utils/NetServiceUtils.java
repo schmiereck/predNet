@@ -54,13 +54,6 @@ public abstract class NetServiceUtils {
                                 neuron.childSynapseList.add(loopbackSynapse);
                             }
                         }
-                        //final NormSynapse loopbackSynapse = new NormSynapse(neuron, calcInitWeight(inputCount), neuron);
-                        final NormNeuron parentLayerNeuron = parentLayerNeuronArr[neuronPos];
-                        final NormSynapse loopbackSynapse = new NormSynapse(parentLayerNeuron, calcInitWeight(rnd, inputCount), neuron);
-                        loopbackSynapse.loopback = true;
-                        //neuron.parentSynapseList.add(loopbackSynapse);
-                        parentLayerNeuron.parentSynapseList.add(loopbackSynapse);
-                        neuron.childSynapseList.add(loopbackSynapse);
                     }
                     // Add bias synapse.
                     final NormSynapse synapse = new NormSynapse(net.biasNeuron, calcInitWeight(rnd, inputCount), neuron);

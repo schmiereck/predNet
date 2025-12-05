@@ -179,13 +179,13 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
         final int netInputCurveLength = 1;
         final int netOutputCurveLength = 6;
         final int hiddenLayerCount = 3;
-        final int hiddenLayerNeuronCount = 9;
+        final int hiddenLayerNeuronCount = 3;
         // Very good with useOutputAsInput as Memory (Nearly impossible without).
         final boolean useOutputAsInput = true;
 
         predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput);
 
-        assertCurveLearned(predNetManagerService, 15_000, 1L, 6_500);
+        assertCurveLearned(predNetManagerService, 15_000, 1L, 1_500);
     }
 
     @Test
@@ -197,7 +197,7 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
         // Only one input value, the network has to use its memory to predict the curve.
         final int netInputCurveLength = 1;
         final int netOutputCurveLength = 6;
-        final int hiddenLayerCount = 6;
+        final int hiddenLayerCount = 9;
         final int hiddenLayerNeuronCount = 9;
         final boolean useOutputAsInput = false;
         final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.Neuron;
