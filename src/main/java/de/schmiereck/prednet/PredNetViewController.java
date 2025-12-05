@@ -4,6 +4,7 @@ import de.schmiereck.prednet.service.CurveDto;
 import de.schmiereck.prednet.service.CurveGeneratorService;
 import de.schmiereck.prednet.service.PredNetManagerService;
 import de.schmiereck.prednet.service.PredNetManagerServiceFactory;
+import de.schmiereck.prednet.service.baseNet.BaseNetService;
 import de.schmiereck.prednet.service.normNet.NormNetService;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -49,12 +50,13 @@ public class PredNetViewController {
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSawtooth;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigSlowSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallSlowSine;
-        //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigFastSine;
+        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.BigFastSine;
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
-        //final int netInputCurveLength = 8;
-        //final int netOutputCurveLength = 6;
-        //final int hiddenLayerCount = 3;
-        //final boolean useOutputAsInput = false;
+        final int netInputCurveLength = 8;
+        final int netOutputCurveLength = 6;
+        final int hiddenLayerCount = 3;
+        final boolean useOutputAsInput = false;
+        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.None;
         // Very good:
         //final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.ModulatedSine;
         //final int netInputCurveLength = 16;
@@ -78,13 +80,14 @@ public class PredNetViewController {
         final boolean useOutputAsInput = true;
         */
         // Very good with useOutputAsInput as Memory (Nearly impossible without):
+        /*
         final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
         final int netInputCurveLength = 1;  // Only 1 input value to predict the next 6 output values.
         final int netOutputCurveLength = 6;
         final int hiddenLayerCount = 3;
         final boolean useOutputAsInput = false;
         final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.Neuron;
-
+        */
         this.predNetManagerService = predNetManagerService;
 
         this.predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, useOutputAsInput, loopbackType);
