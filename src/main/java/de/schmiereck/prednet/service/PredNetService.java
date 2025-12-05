@@ -1,6 +1,7 @@
 package de.schmiereck.prednet.service;
 
 import de.schmiereck.prednet.service.baseNet.BaseNetService;
+import de.schmiereck.prednet.service.integrationNet.IntegrationNetService;
 import de.schmiereck.prednet.service.normNet.NormNet;
 import de.schmiereck.prednet.service.normNet.NormNetService;
 import de.schmiereck.prednet.service.normNet.NormNeuron;
@@ -13,15 +14,16 @@ public class PredNetService {
 
     public PredNetService() {
         this.netService = new NormNetService();
+        //this.netService = new IntegrationNetService();
     }
 
     public void initNet(final int inputCurveLength, final int outputCurveLength, final int hiddenLayerCount) {
-        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.None;
+        final BaseNetService.LoopbackType loopbackType = BaseNetService.LoopbackType.None;
         this.initNet(inputCurveLength, outputCurveLength, hiddenLayerCount, loopbackType);
     }
 
     public void initNet(final int inputCurveLength, final int outputCurveLength, final int hiddenLayerCount,
-                        final NormNetService.LoopbackType loopbackType) {
+                        final BaseNetService.LoopbackType loopbackType) {
         //final int[] layerNeuronCounts = new int[] {
         //        inputCurveLength,
         //        inputCurveLength * 2,

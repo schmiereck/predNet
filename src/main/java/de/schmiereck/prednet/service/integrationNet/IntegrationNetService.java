@@ -1,9 +1,12 @@
-package de.schmiereck.prednet.service.normNet;
+package de.schmiereck.prednet.service.integrationNet;
 
 import de.schmiereck.prednet.service.baseNet.BaseNetService;
+import de.schmiereck.prednet.service.normNet.NormNet;
+import de.schmiereck.prednet.service.normNet.NormNeuron;
+import de.schmiereck.prednet.service.normNet.NormSynapse;
 import de.schmiereck.prednet.service.utils.NetServiceUtils;
 
-public class NormNetService extends BaseNetService {
+public class IntegrationNetService extends BaseNetService {
 
     @Override
     public NormNet initNet(final int[] layerNeuronCounts, final LoopbackType loopbackType) {
@@ -100,9 +103,8 @@ public class NormNetService extends BaseNetService {
             sumValue += (parentValue * synapse.weight) / NormNeuron.MaxValue;
         }
         final long neuronLastValue = neuron.value;
-        neuron.value = calcActivation(sumValue);
-        //neuron.lastValue = (neuronLastValue);
-        neuron.lastValue = (neuronLastValue + neuron.value) / 2; // Durchschnittswert als lastValue speichern
+        neuron.value = calcActivation(neuronLastValue + sumValue / 2L); // Durchschnittswert aus altem und neu berechnetem Wert
+        neuron.lastValue = (neuronLastValue + neuron.value) / 2L; // Durchschnittswert als lastValue speichern
     }
 
     /**
@@ -137,5 +139,4 @@ public class NormNetService extends BaseNetService {
             synapse.weight = Math.max(NormNeuron.MinValue, Math.min(NormNeuron.MaxValue, synapse.weight + deltaWeight));
         }
     }
-
 }

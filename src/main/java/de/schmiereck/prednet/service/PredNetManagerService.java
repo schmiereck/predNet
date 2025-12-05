@@ -1,6 +1,6 @@
 package de.schmiereck.prednet.service;
 
-import de.schmiereck.prednet.service.normNet.NormNetService;
+import de.schmiereck.prednet.service.baseNet.BaseNetService;
 
 import java.util.Arrays;
 
@@ -50,7 +50,7 @@ public class PredNetManagerService {
                         final int netInputCurveLength, final int netOutputCurveLength,
                         final int hiddenLayerCount,
                         final boolean useOutputAsInput) {
-        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.None;
+        final BaseNetService.LoopbackType loopbackType = BaseNetService.LoopbackType.None;
 
         this.initNet(curveType, netInputCurveLength, netOutputCurveLength,
                 hiddenLayerCount, useOutputAsInput, loopbackType);
@@ -60,7 +60,7 @@ public class PredNetManagerService {
                         final int netInputCurveLength, final int netOutputCurveLength,
                         final int hiddenLayerCount,
                         final boolean useOutputAsInput,
-                        final NormNetService.LoopbackType loopbackType) {
+                        final BaseNetService.LoopbackType loopbackType) {
         this.curveType = curveType;
 
         this.curveLength = 45;

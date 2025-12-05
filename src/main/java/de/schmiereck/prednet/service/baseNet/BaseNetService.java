@@ -6,7 +6,7 @@ import de.schmiereck.prednet.service.normNet.NormNetService;
 import java.util.Random;
 
 public abstract class BaseNetService {
-    protected static Random random = new Random(42); // Fixer Seed für Reproduzierbarkeit
+    protected static Random rnd = new Random(42); // Fixer Seed für Reproduzierbarkeit
 
     public enum LoopbackType {
         None,
@@ -15,7 +15,7 @@ public abstract class BaseNetService {
     }
 
     public static void initNewRandomWithSeed(final long seed) {
-        random = new Random(seed);
+        rnd = new Random(seed);
     }
 
     public NormNet initNet(final int[] layerNeuronCounts) {
