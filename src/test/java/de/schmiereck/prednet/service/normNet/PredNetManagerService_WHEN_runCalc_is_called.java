@@ -189,7 +189,64 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
     }
 
     @Test
-    void GIVEN_SmallFastSine_input_1_hidden_6_useLoopback_THEN_curve_not_learned() {
+    void GIVEN_SmallFastSine_input_1_hidden_6_useLoopback_Neuron_THEN_curve_not_learned() {
+        final var predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
+        NormNetService.initNewRandomWithSeed(42L);
+
+        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
+        // Only one input value, the network has to use its memory to predict the curve.
+        final int netInputCurveLength = 1;
+        final int netOutputCurveLength = 6;
+        final int hiddenLayerCount = 9+9;
+        final int hiddenLayerNeuronCount = 9;
+        final boolean useOutputAsInput = false;
+        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.Neuron;
+
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
+
+        assertCurveLearned(predNetManagerService, 500_000, 1L, 500_000);
+    }
+
+    @Test
+    void GIVEN_SmallFastSine_input_1_hidden_6_useLoopback_AllParentsNeuron1_THEN_curve_not_learned() {
+        final var predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
+        NormNetService.initNewRandomWithSeed(42L);
+
+        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
+        // Only one input value, the network has to use its memory to predict the curve.
+        final int netInputCurveLength = 1;
+        final int netOutputCurveLength = 6;
+        final int hiddenLayerCount = 9+9;
+        final int hiddenLayerNeuronCount = 9;
+        final boolean useOutputAsInput = false;
+        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.AllParentsNeuron1;
+
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
+
+        assertCurveLearned(predNetManagerService, 1500_000, 1L, 500_000);
+    }
+
+    @Test
+    void GIVEN_SmallFastSine_input_1_hidden_6_useLoopback_AllParentsNeuron2_THEN_curve_not_learned() {
+        final var predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
+        NormNetService.initNewRandomWithSeed(42L);
+
+        final CurveGeneratorService.CurveType curveType = CurveGeneratorService.CurveType.SmallFastSine;
+        // Only one input value, the network has to use its memory to predict the curve.
+        final int netInputCurveLength = 1;
+        final int netOutputCurveLength = 6;
+        final int hiddenLayerCount = 9+9;
+        final int hiddenLayerNeuronCount = 9;
+        final boolean useOutputAsInput = false;
+        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.AllParentsNeuron2;
+
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
+
+        assertCurveLearned(predNetManagerService, 1500_000, 1L, 500_000);
+    }
+
+    @Test
+    void GIVEN_SmallFastSine_input_1_hidden_6_useLoopback_TopParentNeuron_THEN_curve_not_learned() {
         final var predNetManagerService = PredNetManagerServiceFactory.retrievePredNetManagerService();
         NormNetService.initNewRandomWithSeed(42L);
 
@@ -200,11 +257,11 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
         final int hiddenLayerCount = 9;
         final int hiddenLayerNeuronCount = 9;
         final boolean useOutputAsInput = false;
-        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.Neuron;
+        final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.TopParentNeuron;
 
         predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
 
-        assertCurveLearned(predNetManagerService, 500_000, 1L, 500_000);
+        assertCurveLearned(predNetManagerService, 1500_000, 1L, 500_000);
     }
 
     private static void assertCurveLearned(final PredNetManagerService predNetManagerService, final int maxIterationCount, final long expectedMse, final int expectedIterationCount) {

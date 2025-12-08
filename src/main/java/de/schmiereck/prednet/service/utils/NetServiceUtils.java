@@ -18,7 +18,7 @@ public abstract class NetServiceUtils {
         final NormNet net = new NormNet();
 
         // Create neurons:
-        NormNeuron[] parentLayerNeuronArr = null;
+        NormNeuron[][] parentLayerNeuronArrArr = new NormNeuron[layerNeuronCounts.length][];
         for (int layerPos = 0; layerPos < layerNeuronCounts.length; layerPos++) {
             final int neuronCounts = layerNeuronCounts[layerPos];
             final NormNeuron[] layerNeuronArr = new NormNeuron[neuronCounts];
@@ -31,13 +31,14 @@ public abstract class NetServiceUtils {
 
                 // Create synapses from parent layer to this neuron.
                 if (layerPos > 0) {
-                    final int inputCount = parentLayerNeuronArr.length + 1; // +1 for bias
-                    for (final NormNeuron parentLayerNeuron : parentLayerNeuronArr) {
+                    final int parentLayerPos = layerPos - 1;
+                    final int inputCount = layerNeuronCounts[parentLayerPos] + 1; // +1 for bias
+                    for (final NormNeuron parentLayerNeuron : parentLayerNeuronArrArr[parentLayerPos]) {
                         final NormSynapse synapse = new NormSynapse(parentLayerNeuron, calcInitWeight(rnd, inputCount), neuron);
                         neuron.parentSynapseList.add(synapse);
                         parentLayerNeuron.childSynapseList.add(synapse);
                     }
-                    if ((loopbackType != BaseNetService.LoopbackType.None) && (neuronType == NormNeuron.NeuronType.Hidden)) {
+                    if ((loopbackType != BaseNetService.LoopbackType.None) && (neuronType == NormNeuron.NeuronType.Hidden) && (layerPos > 1)) {
                         // Add loopback memory synapse.
                         switch (loopbackType) {
                             case Neuron -> {
@@ -47,7 +48,35 @@ public abstract class NetServiceUtils {
                                 neuron.childSynapseList.add(loopbackSynapse);
                             }
                             case ParentNeuron -> {
-                                final NormNeuron parentLayerNeuron = parentLayerNeuronArr[neuronPos];
+                                final NormNeuron parentLayerNeuron = parentLayerNeuronArrArr[parentLayerPos][neuronPos];
+                                final NormSynapse loopbackSynapse = new NormSynapse(parentLayerNeuron, calcInitWeight(rnd, inputCount), neuron);
+                                loopbackSynapse.loopback = true;
+                                parentLayerNeuron.parentSynapseList.add(loopbackSynapse);
+                                neuron.childSynapseList.add(loopbackSynapse);
+                            }
+                            case AllParentsNeuron1 -> {
+                                for (int memoryLayerPos = 1; memoryLayerPos < layerNeuronCounts.length; memoryLayerPos++) {
+                                    final NormNeuron parentLayerNeuron = parentLayerNeuronArrArr[memoryLayerPos][neuronPos];
+                                    {
+                                        final NormSynapse loopbackSynapse = new NormSynapse(parentLayerNeuron, calcInitWeight(rnd, inputCount), neuron);
+                                        loopbackSynapse.loopback = true;
+                                        parentLayerNeuron.parentSynapseList.add(loopbackSynapse);
+                                        neuron.childSynapseList.add(loopbackSynapse);
+                                    }
+                                }
+                            }
+                            case AllParentsNeuron2 -> {
+                                for (int memoryLayerPos = 1; memoryLayerPos < layerNeuronCounts.length; memoryLayerPos++) {
+                                    for (final NormNeuron parentLayerNeuron : parentLayerNeuronArrArr[memoryLayerPos]) {
+                                        final NormSynapse loopbackSynapse = new NormSynapse(parentLayerNeuron, calcInitWeight(rnd, inputCount), neuron);
+                                        loopbackSynapse.loopback = true;
+                                        parentLayerNeuron.parentSynapseList.add(loopbackSynapse);
+                                        neuron.childSynapseList.add(loopbackSynapse);
+                                    }
+                                }
+                            }
+                            case TopParentNeuron -> {
+                                final NormNeuron parentLayerNeuron = parentLayerNeuronArrArr[1][neuronPos];
                                 final NormSynapse loopbackSynapse = new NormSynapse(parentLayerNeuron, calcInitWeight(rnd, inputCount), neuron);
                                 loopbackSynapse.loopback = true;
                                 parentLayerNeuron.parentSynapseList.add(loopbackSynapse);
@@ -68,7 +97,7 @@ public abstract class NetServiceUtils {
             if (layerPos == layerNeuronCounts.length - 1) {
                 net.outputNeuronList.addAll(java.util.Arrays.asList(layerNeuronArr));
             }
-            parentLayerNeuronArr = layerNeuronArr;
+            parentLayerNeuronArrArr[layerPos] = layerNeuronArr;
         }
         return net;
     }

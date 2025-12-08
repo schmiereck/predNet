@@ -11,7 +11,10 @@ public abstract class BaseNetService {
     public enum LoopbackType {
         None,
         Neuron,
-        ParentNeuron
+        ParentNeuron,
+        AllParentsNeuron1,
+        AllParentsNeuron2,
+        TopParentNeuron
     }
 
     public static void initNewRandomWithSeed(final long seed) {
