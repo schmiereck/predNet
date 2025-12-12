@@ -1,6 +1,7 @@
 package de.schmiereck.prednet.service;
 
 import de.schmiereck.prednet.service.baseNet.BaseNetService;
+import de.schmiereck.prednet.service.baseNet.BaseNetService.CurvePoint;
 import de.schmiereck.prednet.service.integrationNet.IntegrationNetService;
 import de.schmiereck.prednet.service.normNet.NormNet;
 import de.schmiereck.prednet.service.normNet.NormNetService;
@@ -44,10 +45,10 @@ public class PredNetService {
         this.net = this.netService.initNet(layerNeuronCounts, loopbackType);
     }
 
-    public OutputDto runCalcOutput(final long[] inputCurveArr, final long[] expectedOutputArr) {
-        final long[] scaledInputCurveArr = new long[inputCurveArr.length];
+    public OutputDto runCalcOutput(final long xPosCurve, final CurvePoint[] inputCurveArr, final long[] expectedOutputArr) {
+        final CurvePoint[] scaledInputCurveArr = new CurvePoint[inputCurveArr.length];
         for (int posX = 0; posX < scaledInputCurveArr.length; posX++) {
-            scaledInputCurveArr[posX] = inputCurveArr[posX] * NormNeuron.MaxValue / 100L;
+            scaledInputCurveArr[posX] = new CurvePoint(xPosCurve + posX, inputCurveArr[posX].value() * NormNeuron.MaxValue / 100L);
         }
 
         final long[] scaledExpectedOutputArr = new long[expectedOutputArr.length];
@@ -59,9 +60,9 @@ public class PredNetService {
 
         //this.output = this.precalcCurveArr[(this.xPosCurve + this.curveLength - 1) % this.precalcCurveArr.length] / 2; // Beispielhafte Ausgabe: halber Wert
         //final long output = net.outputNeuronList.get(0).value * 100L / NormNeuron.MaxValue;
-        final long[] outputArr = new long[expectedOutputArr.length];
+        final CurvePoint[] outputArr = new CurvePoint[expectedOutputArr.length];
         for (int outputPos = 0; outputPos < expectedOutputArr.length; outputPos++) {
-            outputArr[outputPos] = net.outputNeuronList.get(outputPos).value * 100L / NormNeuron.MaxValue;
+            outputArr[outputPos] = new CurvePoint(xPosCurve + outputPos, net.outputNeuronList.get(outputPos).value * 100L / NormNeuron.MaxValue);
         }
         final long mse = this.netService.calcError(net, scaledExpectedOutputArr);
         this.netService.calcTrain(net, calcValuePerc(5));

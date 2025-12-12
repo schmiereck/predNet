@@ -1,9 +1,13 @@
 package de.schmiereck.prednet.service.normNet;
 
+import de.schmiereck.prednet.service.baseNet.BaseNetService;
+import de.schmiereck.prednet.service.baseNet.BaseNetService.CurvePoint;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
+import static de.schmiereck.prednet.service.normNet.CurvePointTestUtils.createCurvePointArrByValueArr;
 import static de.schmiereck.prednet.service.normNet.NormNetUtils.calcValuePerc;
 
 public class NormNetService_WHEN_calcTrain_is_called_Test {
@@ -15,23 +19,24 @@ public class NormNetService_WHEN_calcTrain_is_called_Test {
         final NormNet net = normNetService.initNet(layerNeuronCounts);
 
         final long[] inputArr = new long[]{ calcValuePerc(10), calcValuePerc(80) };
+        final CurvePoint[] inputPointArr = createCurvePointArrByValueArr(inputArr);
 
         final long[] targetOutputArr = new long[]{ calcValuePerc(80), calcValuePerc(10) };
 
         for (int iterationPos = 0; iterationPos < 25; iterationPos++) {
-            normNetService.calcValue(net, inputArr);
+            normNetService.calcValue(net, inputPointArr);
             final long mse = normNetService.calcError(net, targetOutputArr);
             System.out.printf("iter: %d: mse: %d%n", iterationPos, mse);
             normNetService.calcTrain(net, calcValuePerc(50));
 
             if (iterationPos % 100 == 0) {
-                showResult(normNetService, net, inputArr, targetOutputArr);
+                showResult(normNetService, net, inputPointArr, targetOutputArr);
             }
         }
-        showResult(normNetService, net, inputArr, targetOutputArr);
+        showResult(normNetService, net, inputPointArr, targetOutputArr);
     }
 
-    private void showResult(final NormNetService normNetService, NormNet net, long[] inputArr, long[] targetOutputArr) {
+    private void showResult(final NormNetService normNetService, NormNet net, CurvePoint[] inputArr, long[] targetOutputArr) {
         System.out.println("---- Ergebnis ----");
         normNetService.calcValue(net, inputArr);
         System.out.printf("in: [%6d, %6d] -> out: [%6d, %6d] (soll: [%6d, %6d])%n",
@@ -68,9 +73,11 @@ public class NormNetService_WHEN_calcTrain_is_called_Test {
             for (int xdataPos = 0; xdataPos < inputArrArr.length; xdataPos++) {
                 final int dataPos = rnd.nextInt(inputArrArr.length);
                 final long[] inputArr = inputArrArr[dataPos];
+                final CurvePoint[] inputPointArr = createCurvePointArrByValueArr(inputArr);
+
                 final long[] targetOutputArr = targetOutputArrArr[dataPos];
 
-                normNetService.calcValue(net, inputArr);
+                normNetService.calcValue(net, inputPointArr);
                 final long mse = normNetService.calcError(net, targetOutputArr);
                 System.out.printf("iter: %4d: mse: %13d%n", iterationPos, mse);
                 normNetService.calcTrain(net, calcValuePerc(25));
@@ -107,9 +114,11 @@ public class NormNetService_WHEN_calcTrain_is_called_Test {
         for (int iterationPos = 0; iterationPos < 150; iterationPos++) {
             for (int dataPos = 0; dataPos < inputArrArr.length; dataPos++) {
                 final long[] inputArr = inputArrArr[dataPos];
+                final CurvePoint[] inputPointArr = createCurvePointArrByValueArr(inputArr);
+
                 final long[] targetOutputArr = targetOutputArrArr[dataPos];
 
-                normNetService.calcValue(net, inputArr);
+                normNetService.calcValue(net, inputPointArr);
                 final long mse = normNetService.calcError(net, targetOutputArr);
                 System.out.printf("iter: %d: mse: %d%n", iterationPos, mse);
                 normNetService.calcTrain(net, calcValuePerc(30));
@@ -125,9 +134,11 @@ public class NormNetService_WHEN_calcTrain_is_called_Test {
         System.out.println("---- Ergebnis ----");
         for (int dataPos = 0; dataPos < inputArrArr.length; dataPos++) {
             final long[] inputArr = inputArrArr[dataPos];
+            final CurvePoint[] inputPointArr = createCurvePointArrByValueArr(inputArr);
+
             final long[] targetOutputArr = targetOutputArrArr[dataPos];
 
-            normNetService.calcValue(net, inputArr);
+            normNetService.calcValue(net, inputPointArr);
             System.out.printf("in: [%7d, %7d] -> out: [%7d, %7d] (soll: [%7d, %7d])%n",
                     inputArr[0], inputArr[1],
                     net.outputNeuronList.get(0).value, net.outputNeuronList.get(1).value,

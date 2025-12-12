@@ -5,6 +5,7 @@ import de.schmiereck.prednet.service.CurveGeneratorService;
 import de.schmiereck.prednet.service.PredNetManagerService;
 import de.schmiereck.prednet.service.PredNetManagerServiceFactory;
 import de.schmiereck.prednet.service.baseNet.BaseNetService;
+import de.schmiereck.prednet.service.baseNet.BaseNetService.CurvePoint;
 import de.schmiereck.prednet.service.normNet.NormNetService;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -46,7 +47,7 @@ public class PredNetViewController {
     private double updateEveryMillis = DEFAULT_UPDATE_INTERVAL;
 
     public void init(final PredNetManagerService predNetManagerService) {
-        final int testCase = 3;
+        final int testCase = 0;
 
         final CurveGeneratorService.CurveType curveType;
         final int netInputCurveLength;
@@ -54,13 +55,13 @@ public class PredNetViewController {
         final int hiddenLayerCount;
         final int hiddenLayerNeuronCount;
         final boolean useOutputAsInput;
+        //     TODO Schalter um logarithmische Zunahme der Zeiträume anzuschalten (logarithmische Kompression)
+        final boolean useLogarithmicTimeSteps = false;
         final NormNetService.LoopbackType loopbackType;
 
         switch(testCase) {
             case 0 -> {
                 // Very good:
-                /*
-                 */
                 //curveType = CurveGeneratorService.CurveType.BigSawtooth;
                 //curveType = CurveGeneratorService.CurveType.BigSlowSine;
                 //curveType = CurveGeneratorService.CurveType.SmallSlowSine;
@@ -115,6 +116,18 @@ public class PredNetViewController {
                 //loopbackType = NormNetService.LoopbackType.Neuron;
                 //loopbackType = NormNetService.LoopbackType.ParentNeuron;
             }
+            case 5 -> {
+                // Very good with useOutputAsInput as Memory (Nearly impossible without):
+                curveType = CurveGeneratorService.CurveType.SmallFastSine;
+                netInputCurveLength = 1;  // Only 1 input value to predict the next 6 output values.
+                netOutputCurveLength = 6;
+                hiddenLayerCount = 12;
+                hiddenLayerNeuronCount = 12;
+                useOutputAsInput = false;   // No Output used as Input.
+                loopbackType = NormNetService.LoopbackType.TopParentNeuron;
+                //loopbackType = NormNetService.LoopbackType.AllParentsNeuron1;
+                //loopbackType = NormNetService.LoopbackType.AllParentsNeuron2;
+            }
             default -> throw new IllegalArgumentException("Invalid test case");
         }
 
@@ -122,7 +135,7 @@ public class PredNetViewController {
 
         this.predNetManagerService.initNet(curveType,
                 netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount,
-                useOutputAsInput, loopbackType);
+                useOutputAsInput, loopbackType, useLogarithmicTimeSteps);
 
         this.setupChart();
 
@@ -200,9 +213,9 @@ public class PredNetViewController {
         final long[] expectedOutputHistorieArr = curveDto.expectedOutputHistorieArr();
         final long[] expectedOutputArr = curveDto.expectedOutputArr();
 
-        final long[] outputHistorieCurveArr = curveDto.outputHistorieCurveArr();
-        final long[] inputCurveArr = curveDto.inputCurveArr();
-        final long[] outputCurveArr = curveDto.outputCurveArr();
+        final CurvePoint[] outputHistorieCurveArr = curveDto.outputHistorieCurveArr();
+        final CurvePoint[] inputCurveArr = curveDto.inputCurveArr();
+        final CurvePoint[] outputCurveArr = curveDto.outputCurveArr();
 
         this.expectedOutputLine.getPoints().clear();
         this.expectedOutputHistorieLine.getPoints().clear();
@@ -283,8 +296,8 @@ public class PredNetViewController {
         }
     }
 
-    private static double calcYPos(final double height, final double minVal, final double range, final long value) {
-        return calcYPos(height, minVal, range, (double) value);
+    private static double calcYPos(final double height, final double minVal, final double range, final CurvePoint value) {
+        return calcYPos(height, minVal, range, (double) value.value());
     }
 
     private static double calcYPos(final double height, final double minVal, final double range, final double value) {

@@ -1,7 +1,10 @@
 package de.schmiereck.prednet.service.normNet;
 
+import de.schmiereck.prednet.service.baseNet.BaseNetService.CurvePoint;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static de.schmiereck.prednet.service.normNet.CurvePointTestUtils.createCurvePointArrByValueArr;
 
 public class NormNet_WHEN_calcTrain_is_called {
     @Test
@@ -42,13 +45,15 @@ public class NormNet_WHEN_calcTrain_is_called {
         //--------------------------------------------------------------------------------------------------------------
 
         final long[] inputArr = new long[] { inputValue };
+        final CurvePoint[] inputPointArr = createCurvePointArrByValueArr(inputArr);
+
         final long[] targetOutputArr = new long[] { inputValue };
 
         //--------------------------------------------------------------------------------------------------------------
         final long learningRate = NormNetUtils.calcValuePerc(10L); // 10%
 
         //--------------------------------------------------------------------------------------------------------------
-        normNetService.calcValue(net, inputArr);
+        normNetService.calcValue(net, inputPointArr);
         normNetService.calcError(net, targetOutputArr);
         normNetService.calcTrain(net, learningRate);
 
@@ -117,13 +122,15 @@ public class NormNet_WHEN_calcTrain_is_called {
         //--------------------------------------------------------------------------------------------------------------
 
         final long[] inputArr = new long[] { inputValue };
+        final CurvePoint[] inputPointArr = createCurvePointArrByValueArr(inputArr);
+
         final long[] targetOutputArr = new long[] { inputValue };
 
         //--------------------------------------------------------------------------------------------------------------
         final long learningRate = NormNetUtils.calcValuePerc(10L); // 10%
 
         //--------------------------------------------------------------------------------------------------------------
-        normNetService.calcValue(net, inputArr);
+        normNetService.calcValue(net, inputPointArr);
         normNetService.calcError(net, targetOutputArr);
         normNetService.calcTrain(net, learningRate);
 

@@ -1,5 +1,7 @@
 package de.schmiereck.prednet.service.normNet;
 
+import de.schmiereck.prednet.service.baseNet.BaseNetService;
+import de.schmiereck.prednet.service.baseNet.BaseNetService.CurvePoint;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +26,7 @@ public class NormNet_WHEN_calcValue_is_called {
 
         neuron.value = inputValue;
 
-        final long[] inputArr = new long[] { };
+        final CurvePoint[] inputArr = new CurvePoint[] { };
 
         //--------------------------------------------------------------------------------------------------------------
         final long s0ExpectedValue = inputValue;
@@ -69,7 +71,7 @@ public class NormNet_WHEN_calcValue_is_called {
 
         neuron.value = inputValue;
 
-        final long[] inputArr = new long[] { };
+        final CurvePoint[] inputArr = new CurvePoint[] { };
 
         //--------------------------------------------------------------------------------------------------------------
         final long s0ExpectedValue = inputValue;

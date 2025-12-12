@@ -1,7 +1,10 @@
 package de.schmiereck.prednet.service.normNet;
 
+import de.schmiereck.prednet.service.baseNet.BaseNetService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static de.schmiereck.prednet.service.normNet.CurvePointTestUtils.createCurvePointArrByValueArr;
 
 public class NormNetService_WHEN_calcValue_is_called_Test {
 
@@ -21,8 +24,9 @@ public class NormNetService_WHEN_calcValue_is_called_Test {
         net.neuronList.get(3).parentSynapseList.get(2).weight = 100_000; // Bias.
 
         final long[] inputArr = new long[]{ 500, 1_000 };
+        final BaseNetService.CurvePoint[] inputPointArr = createCurvePointArrByValueArr(inputArr);
 
-        normNetService.calcValue(net, inputArr);
+        normNetService.calcValue(net, inputPointArr);
 
         // Max	1000000
         // Bias	1000000

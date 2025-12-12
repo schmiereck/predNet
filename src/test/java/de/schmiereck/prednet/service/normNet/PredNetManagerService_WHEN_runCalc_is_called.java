@@ -92,8 +92,9 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
         final int hiddenLayerNeuronCount = netInputCurveLength * 2;
         final boolean useOutputAsInput = false;
         final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.None;
+        final boolean useLogarithmicTimeSteps = false;
 
-        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType, useLogarithmicTimeSteps);
 
         assertCurveLearned(predNetManagerService, 50_000, 1L, 2_900);
     }
@@ -110,8 +111,9 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
         final boolean useOutputAsInput = false;
         final int hiddenLayerNeuronCount = netInputCurveLength * 2;
         final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.Neuron;
+        final boolean useLogarithmicTimeSteps = false;
 
-        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType, useLogarithmicTimeSteps);
 
         assertCurveLearned(predNetManagerService, 50_000, 1L, 2_900);
     }
@@ -201,10 +203,11 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
         final int hiddenLayerNeuronCount = 9;
         final boolean useOutputAsInput = false;
         final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.Neuron;
+        final boolean useLogarithmicTimeSteps = false;
 
-        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType, useLogarithmicTimeSteps);
 
-        assertCurveLearned(predNetManagerService, 500_000, 1L, 500_000);
+        assertCurveLearned(predNetManagerService, 1500_000, 1L, 500_000);
     }
 
     @Test
@@ -220,8 +223,9 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
         final int hiddenLayerNeuronCount = 9;
         final boolean useOutputAsInput = false;
         final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.AllParentsNeuron1;
+        final boolean useLogarithmicTimeSteps = false;
 
-        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType, useLogarithmicTimeSteps);
 
         assertCurveLearned(predNetManagerService, 1500_000, 1L, 500_000);
     }
@@ -239,8 +243,9 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
         final int hiddenLayerNeuronCount = 9;
         final boolean useOutputAsInput = false;
         final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.AllParentsNeuron2;
+        final boolean useLogarithmicTimeSteps = false;
 
-        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType, useLogarithmicTimeSteps);
 
         assertCurveLearned(predNetManagerService, 1500_000, 1L, 500_000);
     }
@@ -254,12 +259,13 @@ public class PredNetManagerService_WHEN_runCalc_is_called {
         // Only one input value, the network has to use its memory to predict the curve.
         final int netInputCurveLength = 1;
         final int netOutputCurveLength = 6;
-        final int hiddenLayerCount = 9;
+        final int hiddenLayerCount = 9+9;
         final int hiddenLayerNeuronCount = 9;
         final boolean useOutputAsInput = false;
         final NormNetService.LoopbackType loopbackType = NormNetService.LoopbackType.TopParentNeuron;
+        final boolean useLogarithmicTimeSteps = false;
 
-        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType);
+        predNetManagerService.initNet(curveType, netInputCurveLength, netOutputCurveLength, hiddenLayerCount, hiddenLayerNeuronCount, useOutputAsInput, loopbackType, useLogarithmicTimeSteps);
 
         assertCurveLearned(predNetManagerService, 1500_000, 1L, 500_000);
     }

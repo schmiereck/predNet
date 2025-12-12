@@ -1,6 +1,8 @@
 package de.schmiereck.prednet;
 
 import de.schmiereck.prednet.service.*;
+import de.schmiereck.prednet.service.baseNet.BaseNetService;
+import de.schmiereck.prednet.service.baseNet.BaseNetService.CurvePoint;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -51,14 +53,14 @@ public class PredNetMain {
 
     private static void showCurve(final PredNetManagerService predNetManagerService) {
         final CurveDto curveDto = predNetManagerService.retrieveCurve();
-        final long[] inputArr = curveDto.inputHistorieCurveArr();
+        final CurvePoint[] inputArr = curveDto.inputHistorieCurveArr();
         for (int xPos = 0; xPos < inputArr.length; xPos++) {
-            System.out.printf("%3d ", inputArr[xPos]);
+            System.out.printf("%3d ", inputArr[xPos].value());
         }
         System.out.print(" |  ");
-        final long[] outputArr = curveDto.outputHistorieCurveArr();
+        final CurvePoint[] outputArr = curveDto.outputHistorieCurveArr();
         for (int xPos = 0; xPos < outputArr.length; xPos++) {
-            System.out.printf("%3d ", outputArr[xPos]);
+            System.out.printf("%3d ", outputArr[xPos].value());
         }
         //System.out.printf(" : %s", curveDto.outputCurveArr());
         System.out.println();

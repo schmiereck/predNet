@@ -1,4 +1,6 @@
 package de.schmiereck.prednet.service;
 
-public record OutputDto(long[] outputArr, long mse) {
+import de.schmiereck.prednet.service.baseNet.BaseNetService.CurvePoint;
+
+public record OutputDto(CurvePoint[] outputArr, long mse) {
 }

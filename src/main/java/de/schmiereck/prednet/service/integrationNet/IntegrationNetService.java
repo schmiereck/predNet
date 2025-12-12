@@ -76,10 +76,10 @@ public class IntegrationNetService extends BaseNetService {
     }
 
     @Override
-    public void calcValue(final NormNet net, final long[] inputArr) {
+    public void calcValue(final NormNet net, final CurvePoint[] inputArr) {
         for (int neuronPos = 0; neuronPos < net.inputNeuronList.size(); neuronPos++) {
             final NormNeuron neuron = net.inputNeuronList.get(neuronPos);
-            neuron.value = inputArr[neuronPos];
+            neuron.value = inputArr[neuronPos].value();
         }
         for (final NormNeuron neuron : net.neuronList) {
             if (neuron.neuronType != NormNeuron.NeuronType.Input) {

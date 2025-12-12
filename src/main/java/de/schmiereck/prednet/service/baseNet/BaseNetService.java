@@ -17,6 +17,9 @@ public abstract class BaseNetService {
         TopParentNeuron
     }
 
+    public record CurvePoint(long timePos, long value) {
+    }
+
     public static void initNewRandomWithSeed(final long seed) {
         rnd = new Random(seed);
     }
@@ -30,7 +33,7 @@ public abstract class BaseNetService {
 
     public abstract long calcError(final NormNet net, final long[] targetOutputArr);
 
-    public abstract void calcValue(final NormNet net, final long[] inputArr);
+    public abstract void calcValue(final NormNet net, final CurvePoint[] inputArr);
 
     public abstract void calcTrain(final NormNet net, final long learningRate);
 }
